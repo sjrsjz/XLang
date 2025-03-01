@@ -506,7 +506,7 @@ class GetAttr:
         return self.obj.get_value().get_member(self.key)
 
     def assgin(self, value):
-        self.obj.get_value().values[self.key].assgin(value)
+        self.obj.get_value().get_member(self.key).assgin(value)
 
 
 class IndexOf:

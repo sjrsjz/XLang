@@ -5,35 +5,7 @@ from lang.parser import build_ast
 from lang.parser.IR_generator import IRGenerator
 
 
-def test2():
-    IRs = [
-        IR(IRType.NEW_FRAME),
-        IR(IRType.LOAD_STRING, "Please input a number: "),
-        IR(IRType.BUILDIN_CALL, "print"),
-        IR(IRType.BUILDIN_CALL, "input"),
-        IR(IRType.STATIC_CAST, "float"),
-        IR(IRType.LOAD_STRING, "Please input another number: "),
-        IR(IRType.BUILDIN_CALL, "print"),
-        IR(IRType.BUILDIN_CALL, "input"),
-        IR(IRType.STATIC_CAST, "float"),
-        IR(IRType.BINARAY_OPERTOR, "/"),
-        IR(IRType.LOAD_STRING, "The result is: "),
-        IR(IRType.BUILDIN_CALL, "print"),
-        IR(IRType.LET, "result"),
-        IR(IRType.GET, "result"),
-        IR(IRType.BUILDIN_CALL, "print"),
-        IR(IRType.POP_FRAME),
-    ]
-
-    functions = Functions()
-    functions.add("__main__", IRs)
-
-    executor = IRExecutor(functions)
-    executor.execute(entry="__main__")
-    print(executor.stack)
-
-
-def test3():
+def test():
     code = """
     
 
@@ -54,7 +26,7 @@ def test3():
     methodA := objectA.'functionA';
     result := methodA('arg1': left, 'arg2': right);
     
-    __builtins__."print"(functionA(left, right), result);
+    print(functionA(left, right), result);
     """
 
     code = """
@@ -64,7 +36,7 @@ def test3():
         "1 < 2"
     );
 
-    __builtins__."print"(A);
+    print(A);
 
     if (3 > 2) {
         A = "3 > 2";
@@ -72,12 +44,12 @@ def test3():
         A = "3 < 2";
     };
 
-    __builtins__."print"(A);
+    print(A);
 
     i := 0;
     while (i < 10) {
         i = i + 1;
-        __builtins__."print"(i);
+        print(i);
     };
     
     """
@@ -93,47 +65,64 @@ def test3():
     };
 
     // 计算前10个斐波那契数并打印
-    __builtins__."print"("递归方式计算的斐波那契数列:");
+    print("递归方式计算的斐波那契数列:");
     i := 0;
     while (i < 10) {
-        __builtins__."print"("fib(", i, ") = ", fibonacci(i));
+        print("fib(", i, ") = ", fibonacci(i));
         i = i + 1;
     };
     """
 
     code = """
+BuiltIn := () -> {
+    return (
+        'print': ('arg': null) -> {
+            print(arg);
+            return null;
+        },
+    )
+};
+
+BuiltIn()."print"("Hello, World!");
+"""
+
+    code = """
 // 创建一个计数器工厂
 createCounter := () -> {
-    count := 0;  // 闭包中的私有变量
-    
+    count := 1;
+    return ('count': count) -> {
+        count = count + 1;
+        return count;
+    };
+};
+
+counter1 := createCounter();
+counter2 := createCounter();
+
+print(counter1());  // 输出 2
+print(counter1());  // 输出 3
+print(counter2());  // 输出 2，因为是独立闭包
+
+"""
+
+    code = """
+ClassBuilder := () -> {
     return (
-        'increment': () -> {
-            count = count + 1;
-            return count;
+        'member': 1,
+        'method': () -> {
+            return self.'member';
         },
-        'decrement': () -> {
-            count = count - 1;
-            return count;
-        },
-        'reset': () -> {
-            count = 0;
-            return count;
-        },
-        'getValue': () -> {
-            return count;
-        }
     );
 };
 
-// 创建并测试计数器
-counter := createCounter();
-__builtins__."print"("初始值:", counter.'getValue'());
-__builtins__."print"("递增:", counter.'increment'());
-__builtins__."print"("递增:", counter.'increment'());
-__builtins__."print"("递增:", counter.'increment'());
-__builtins__."print"("递减:", counter.'decrement'());
-__builtins__."print"("当前值:", counter.'getValue'());
-__builtins__."print"("重置:", counter.'reset'());"""
+object := ClassBuilder();
+print(object.'method'());
+object.'member' = 2;
+lambda := object.'method';
+print(lambda());
+"""
+
+
 
     ast = build_ast(code)
     functions = Functions()
@@ -149,4 +138,4 @@ __builtins__."print"("重置:", counter.'reset'());"""
 
 
 if __name__ == "__main__":
-    test3()
+    test()

@@ -104,9 +104,13 @@ class IRGenerator:
 
         elif node_type == XLangASTNodeTypes.TUPLE:
             irs = []
+            tuple_size = 0
             for child in node.children:
+                if child.node_type == XLangASTNodeTypes.NONE:
+                    continue
                 irs.extend(self.generate(child))
-            irs.append(IR(IRType.BUILD_TUPLE, len(node.children)))
+                tuple_size += 1
+            irs.append(IR(IRType.BUILD_TUPLE, tuple_size))
             return irs
 
         elif node_type == XLangASTNodeTypes.KEY_VAL:

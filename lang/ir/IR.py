@@ -42,7 +42,6 @@ class IRType(enum.Enum):
     JUMP = auto()  # 无条件跳转到特定位置
     JUMP_TO = auto()  # 无条件跳转到特定位置
     JUMP_IF_FALSE = auto()  # 如果栈顶为真则跳转
-    STATIC_CAST = auto()  # 静态类型转换
     RESET_STACK = auto()  # 重置栈
 
 
@@ -89,6 +88,61 @@ class Functions:
         return str(self)
 
 
+def create_builtins(context):
+    def print_func(args):
+        list_args = [arg.value for arg in args]
+        print(*list_args)
+        return NoneType()
+
+    def input_func(args):
+        return String(input())
+
+    def len_func(args):
+        obj = args[0]
+        if isinstance(obj, Tuple):
+            return Int(len(obj.values))
+        elif isinstance(obj, String):
+            return Int(len(obj.value))
+        else:
+            raise ValueError(f"Object: {obj} has no length")
+
+    def type_func(args):
+        obj = args[0]
+        return String(type(obj).__name__)
+    
+    def int_func(args):
+        obj = args[0]
+        return Int(int(obj.value))
+    
+    def float_func(args):
+        obj = args[0]
+        return Float(float(obj.value))
+    
+    def str_func(args):
+        obj = args[0]
+        return String(str(obj.value))
+    
+    def bool_func(args):
+        obj = args[0]
+        return Bool(bool(obj.value))
+    
+    def range_func(args):
+        start = args[0]
+        end = args[1]
+        step = args[2] if len(args) > 2 else 1
+        return Tuple([Int(i) for i in range(start.value, end.value, step.value)])
+
+    context.let("print", BuiltIn(print_func))
+    context.let("input", BuiltIn(input_func))
+    context.let("len", BuiltIn(len_func))
+    context.let("type", BuiltIn(type_func))
+    context.let("int", BuiltIn(int_func))
+    context.let("float", BuiltIn(float_func))
+    context.let("str", BuiltIn(str_func))
+    context.let("bool", BuiltIn(bool_func))
+    context.let("range", BuiltIn(range_func))
+
+
 class IRExecutor:
     def __init__(self, functions):
         self.stack = []
@@ -97,21 +151,8 @@ class IRExecutor:
         self.instructions, self.func_ips = functions.build_instructions()
 
     def execute(self, entry="__main__"):
-
-        def print_func(args):
-            list_args = [arg.value for arg in args]
-            print(*list_args)
-            return NoneType()
-
         self.context.new_frame(self.stack)
-        self.context.let(
-            "__builtins__",
-            Tuple(
-                [
-                    KeyValue(String("print"), BuiltIn(print_func)),
-                ]
-            ),
-        )
+        create_builtins(self.context)
 
         self.ip = self.func_ips[entry]
 
@@ -220,7 +261,7 @@ class IRExecutor:
                 self.context.new_frame(self.stack, enter_func=True)
                 # 获取函数
                 signature = func.signature  # 获取函数签名
-                default_args = func.default_args_tuple.copy()  # 获取默认参数
+                default_args = func.default_args_tuple  # 获取默认参数
 
                 default_args.assgin_members(arg_tuple)  # 将参数赋值给默认参数
 
@@ -278,20 +319,6 @@ class IRExecutor:
             index = self.stack.pop().get_value().value
             obj = self.stack.pop()
             self.stack.append(IndexOf(obj, index))
-
-        elif instr.ir_type == IRType.STATIC_CAST:
-            value = self.stack.pop().get_value()
-            target_type = instr.value
-            if target_type == "int":
-                self.stack.append(Int(value.value))
-            elif target_type == "float":
-                self.stack.append(Float(value.value))
-            elif target_type == "bool":
-                self.stack.append(Bool(value.value))
-            elif target_type == "string":
-                self.stack.append(String(value.value))
-            else:
-                raise ValueError(f"Unknown target type: {target_type}")
 
         elif instr.ir_type == IRType.RESET_STACK:
             del self.stack[self.context.stack_pointers[-1] + 1 :]

@@ -415,28 +415,40 @@ class XLangAssign:
         self.token_list = token_list
 
     def match(self, start_idx):
-        if start_idx + 2 >= len(self.token_list):
-            return None, 0
-        if not _is_assign(self.token_list[start_idx + 1]):
-            return None, 0
+        # 向右搜索 = 符号
+        offset = 0
+        left_tokens = []
+        while start_idx + offset < len(self.token_list):
+            if _is_assign(self.token_list[start_idx + offset]):
+                # 找到 = 符号
+                break
+            left_tokens.append(self.token_list[start_idx + offset])
+            offset += 1
 
-        left = Gather(self.token_list[start_idx]).gather()
+        if start_idx + offset >= len(self.token_list) or not _is_assign(
+            self.token_list[start_idx + offset]
+        ):
+            return None, 0  # 没找到 = 符号
 
-        right_guess, offset = node_matcher.match(
-            self.token_list, start_idx + 2
-        )  # 尝试匹配右边的表达式
+        # 对左侧进行解析
+        left_node, left_offset = node_matcher.match(left_tokens, 0)
+        if not left_node:
+            return None, 0
+        if left_offset != len(left_tokens):
+            raise Exception(
+                "Invalid assign: Left side can't be fully matched: ", left_tokens
+            )
+
+        # 对右侧进行解析
+        right_guess, right_offset = node_matcher.match(
+            self.token_list, start_idx + offset + 1
+        )
         if not right_guess:
             return None, 0
 
-        left_node, left_offset = node_matcher.match(left, 0)
-        if not left_node:
-            return None, 0
-        if left_offset != len(left):
-            raise Exception("Invalid assgin: Left side can't be fully matched: ", left)
-        right_node = right_guess
         return (
-            XLangASTNode(XLangASTNodeTypes.ASSIGN, [left_node, right_node]),
-            offset + 2,
+            XLangASTNode(XLangASTNodeTypes.ASSIGN, [left_node, right_guess]),
+            offset + right_offset + 1,  # +1 是因为 = 符号
         )
 
 
