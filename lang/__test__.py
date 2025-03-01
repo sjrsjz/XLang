@@ -82,6 +82,58 @@ def test3():
     
     """
 
+    code = """
+    // 递归方式实现斐波那契数列
+    fibonacci := ('n': 0) -> {
+        if (n <= 1) {
+            return n;
+        } else {
+            return fibonacci(n - 1) + fibonacci(n - 2);
+        };
+    };
+
+    // 计算前10个斐波那契数并打印
+    __builtins__."print"("递归方式计算的斐波那契数列:");
+    i := 0;
+    while (i < 10) {
+        __builtins__."print"("fib(", i, ") = ", fibonacci(i));
+        i = i + 1;
+    };
+    """
+
+    code = """
+// 创建一个计数器工厂
+createCounter := () -> {
+    count := 0;  // 闭包中的私有变量
+    
+    return (
+        'increment': () -> {
+            count = count + 1;
+            return count;
+        },
+        'decrement': () -> {
+            count = count - 1;
+            return count;
+        },
+        'reset': () -> {
+            count = 0;
+            return count;
+        },
+        'getValue': () -> {
+            return count;
+        }
+    );
+};
+
+// 创建并测试计数器
+counter := createCounter();
+__builtins__."print"("初始值:", counter.'getValue'());
+__builtins__."print"("递增:", counter.'increment'());
+__builtins__."print"("递增:", counter.'increment'());
+__builtins__."print"("递增:", counter.'increment'());
+__builtins__."print"("递减:", counter.'decrement'());
+__builtins__."print"("当前值:", counter.'getValue'());
+__builtins__."print"("重置:", counter.'reset'());"""
 
     ast = build_ast(code)
     functions = Functions()
@@ -91,7 +143,7 @@ def test3():
     IRs = generator.generate(ast)
     functions.add("__main__", IRs)
 
-    # print(functions)
+    print(functions)
     executor = IRExecutor(functions)
     executor.execute()
 

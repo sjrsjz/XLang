@@ -108,6 +108,9 @@ class Int:
 
     def get_value(self):
         return self
+    
+    def copy(self):
+        return Int(self.value)
 
 
 class Float:
@@ -188,6 +191,9 @@ class Float:
 
     def get_value(self):
         return self
+    
+    def copy(self):
+        return Float(self.value)
 
 
 class Bool:
@@ -225,6 +231,9 @@ class Bool:
 
     def get_value(self):
         return self
+    
+    def copy(self):
+        return Bool(self.value)
 
 
 class String:
@@ -276,6 +285,8 @@ class String:
     def get_value(self):
         return self
 
+    def copy(self):
+        return String(self.value)
 
 class NoneType:
     def __init__(self):
@@ -301,6 +312,9 @@ class NoneType:
 
     def assgin(self, value):
         pass
+
+    def copy(self):
+        return NoneType()
 
 
 class KeyValue:
@@ -351,6 +365,9 @@ class Lambda:
 
     def get_value(self):
         return self
+    
+    def copy(self):
+        return Lambda(self.captured_val, self.default_args_tuple.copy(), self.signature)
 
 
 class Tuple:

@@ -29,7 +29,7 @@ class IRGenerator:
             irs = []
             args = node.children[0]
             if args.node_type != XLangASTNodeTypes.TUPLE:
-                args = XLangASTNodeTypes.TUPLE(args.children)
+                args = XLangASTNode(XLangASTNodeTypes.TUPLE, [args])
 
             # 解析函数参数IR
             args_ir = self.generate(args)
@@ -37,7 +37,7 @@ class IRGenerator:
             # 解析函数体IR
             signture = self.function_signature_generator(node)
 
-            generator = IRGenerator(signture)
+            generator = IRGenerator(self.functions, signture)
             body_ir = generator.generate(node.children[1])
             body_ir.append(IR(IRType.RETURN_NONE))
             # 生成函数定义IR

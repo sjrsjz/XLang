@@ -711,7 +711,7 @@ class XLangFunctionDef:
             return None, 0
 
         left_node, left_offset = node_matcher.match(
-            Gather(_unwrap_tuple(self.token_list[start_idx])).gather(), 0
+            Gather(self.token_list[start_idx]).gather(), 0
         )
         if not left_node:
             return None, 0
@@ -792,7 +792,7 @@ class XLangMemberAccess:
         elif access_type == "()":
             # 处理函数调用
             args = Gather(
-                _unwrap_tuple(self.token_list[start_idx + access_points[idx][0]])
+                self.token_list[start_idx + access_points[idx][0]]
             ).gather()
             args_node, args_offset = node_matcher.match(args, 0)
             if not args_node or args_offset != len(args):
@@ -828,8 +828,11 @@ class XLangVariable:
 
     def match(self, start_idx):
         if _is_tuple(self.token_list[start_idx]):
+            unwarped = _unwrap_tuple(self.token_list[start_idx])
+            if len(unwarped) == 0:
+                return XLangASTNode(XLangASTNodeTypes.TUPLE, []), 1
             node, offset = node_matcher.match(
-                Gather(_unwrap_tuple(self.token_list[start_idx])).gather(), 0
+                Gather(unwarped).gather(), 0
             )
             if not node:
                 return None, 0

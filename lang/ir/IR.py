@@ -102,7 +102,6 @@ class IRExecutor:
             list_args = [arg.value for arg in args]
             print(*list_args)
             return NoneType()
-        
 
         self.context.new_frame(self.stack)
         self.context.let(
@@ -216,11 +215,12 @@ class IRExecutor:
                 self.stack.append(result)
                 return
             elif isinstance(func, Lambda):
+                self.stack.append(self.ip)  # 保存当前ip
                 # 建立参数帧
-                self.context.new_frame(self.stack)
+                self.context.new_frame(self.stack, enter_func=True)
                 # 获取函数
                 signature = func.signature  # 获取函数签名
-                default_args = func.default_args_tuple  # 获取默认参数
+                default_args = func.default_args_tuple.copy()  # 获取默认参数
 
                 default_args.assgin_members(arg_tuple)  # 将参数赋值给默认参数
 
@@ -233,22 +233,19 @@ class IRExecutor:
                 if func.caller is not None:
                     self.context.let("self", func.caller)
 
-                self.stack.append(self.ip)  # 保存当前ip
-
                 ip = self.func_ips[signature]  # 获取函数入口地址
                 self.ip = ip - 1  # -1是因为后面会+1
             else:
                 raise ValueError(f"Object: {self.stack[-1]} is not callable")
         elif instr.ir_type == IRType.RETURN:
             result = self.stack.pop()
-            self.context.pop_frame(self.stack)
+            self.context.pop_frame(self.stack, exit_func=True)
             self.ip = self.stack.pop()
-            self.context.pop_frame(self.stack)  # 弹出默认参数帧
             self.stack.append(result)
 
         elif instr.ir_type == IRType.RETURN_NONE:
             self.ip = self.stack.pop()
-            self.context.pop_frame(self.stack)
+            self.context.pop_frame(self.stack, exit_func=True)
             self.stack.append(NoneType())
 
         elif instr.ir_type == IRType.NEW_FRAME:
