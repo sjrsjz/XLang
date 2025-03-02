@@ -576,5 +576,5 @@ class Ref:
     def __ne__(self, other):
         return Bool(self.value != other.value)
     
-    def unref(self):
+    def deref(self):
         return self.value

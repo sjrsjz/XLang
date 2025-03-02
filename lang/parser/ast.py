@@ -827,7 +827,7 @@ class XLangFunctionDef:
         return XLangASTNode(XLangASTNodeTypes.FUNCTION_DEF, [left_node, right_node]), 3
 
 
-@node_matcher.register(priority=2)
+@node_matcher.register(priority=3)
 class XLangModifier:
     # 匹配 modifier xxx
     def __init__(self, token_list):
@@ -838,7 +838,7 @@ class XLangModifier:
             return None, 0
         if len(self.token_list[start_idx]) == 1 and self.token_list[start_idx][0][
             "token"
-        ] in ["copy", "ref", "unref"]:
+        ] in ["copy", "ref", "deref"]:
             node, offset = node_matcher.match(self.token_list, start_idx + 1)
             if node == None:
                 return None, 0
@@ -851,7 +851,7 @@ class XLangModifier:
             )
         return None, 0
 
-@node_matcher.register(priority=3)
+@node_matcher.register(priority=2)
 class XLangMemberAccess:
     """匹配成员访问操作：xxx[xxx] 和 xxx.xxx 和 xxx(xxx)"""
 

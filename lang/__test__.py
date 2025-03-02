@@ -177,7 +177,7 @@ print(lambda());
             'container': container,
             'idx': 0,
             'next': () -> {
-                if (self.idx <= len( self.container) - 1) {
+                if (self.idx <= len(deref self.container) - 1) {
                     self.idx = self.idx + 1;
                     return true;
                 } else {
@@ -185,17 +185,42 @@ print(lambda());
                 }
             },
             'get': () -> {
-                return  self.container[self.idx - 1];
-            },        
+                return (deref self.container)[self.idx - 1];
+            },
+            'reset': () -> {
+                self.idx = 0;
+            },
+            'set': ('idx': 0, 'value': null) -> {
+                (deref self.container)[idx] = value;
+            },
         );
     };
 
     container := range(0, 100);
-    iterA := iter( container);
+    iterA := iter(ref container);
     
+    iterA.set(0, 100);
+
     while (iterA.next()) {
         print(iterA.get());
     };
+
+    print(repr(container));
+
+    """
+
+    code = """
+    A := 1;
+    B := ref A;
+    C := deref B;
+    print(repr(B), repr(C));
+
+    step := ('value': 0) -> {
+        deref value = deref value + 1;
+    };
+
+    step(ref A);
+    print(repr(A));
 
     """
 

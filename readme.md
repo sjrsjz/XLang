@@ -120,3 +120,13 @@ counter := createCounter();
 print(counter());  // 输出: 1
 print(counter());  // 输出: 2
 ```
+
+### 引用和解引用
+
+使用 `ref` 和 `deref` 关键字进行引用和解引用操作：
+
+```
+a := 1;
+b := ref a;
+print(deref b);  // 输出: 1
+```

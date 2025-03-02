@@ -178,9 +178,9 @@ class IRGenerator:
             elif node.children[0] == 'ref':
                 irs.extend(val)
                 irs.append(IR(IRType.REF_VAL))
-            elif node.children[0] == 'unref':
+            elif node.children[0] == 'deref':
                 irs.extend(val)
-                irs.append(IR(IRType.UNREF_VAL))
+                irs.append(IR(IRType.DEREF_VAL))
             else:
                 raise ValueError(f"Unknown modifier: {node.children[0]}")
             return irs

@@ -46,7 +46,7 @@ class IRType(enum.Enum):
     RESET_STACK = auto()  # 重置栈
     COPY_VAL = auto() # 复制值
     REF_VAL = auto() # 引用值
-    UNREF_VAL = auto() # 取消引用值
+    DEREF_VAL = auto() # 取消引用值
 
 class IR:
     def __init__(self, ir_type, value=None):
@@ -444,9 +444,9 @@ class IRExecutor:
         elif instr.ir_type == IRType.REF_VAL:
             self.stack.append(Ref(self.stack.pop()))
 
-        elif instr.ir_type == IRType.UNREF_VAL:
+        elif instr.ir_type == IRType.DEREF_VAL:
             v = self.stack.pop().get_value()
             if isinstance(v, Ref):
-                self.stack.append(v.unref())
+                self.stack.append(v.deref())
             else:
-                raise ValueError(f"Can't unref non-ref value: {v}")
+                raise ValueError(f"Can't deref non-ref value: {v}")
