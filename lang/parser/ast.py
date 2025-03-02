@@ -214,6 +214,7 @@ class XLangASTNodeTypes(enum.Enum):
     RETURN = auto()
     IF = auto()
     WHILE = auto()
+    MODIFY = auto()
 
 
 class XLangASTNode:
@@ -364,21 +365,6 @@ class XLangTuple:
         )
 
 
-@node_matcher.register(priority=50)
-class XLangNeverReturn:
-    # 匹配 !
-    def __init__(self, token_list):
-        self.token_list = token_list
-
-    def match(self, start_idx):
-        if not _is_exclamation(self.token_list[start_idx]):
-            return None, 0
-        guess, offset = node_matcher.match(self.token_list, start_idx + 1)
-        if not guess:
-            return None, 0
-        return XLangASTNode(XLangASTNodeTypes.NEVERRETURN, guess), offset + 1
-
-
 @node_matcher.register(priority=40)
 class XLangLet:
     # 匹配 xxx := xxx
@@ -452,6 +438,36 @@ class XLangAssign:
         )
 
 
+@node_matcher.register(priority=22)
+class XLangKeyVal:
+    # 匹配 xxx: xxx
+    def __init__(self, token_list):
+        self.token_list = token_list
+
+    def match(self, start_idx):
+        if start_idx + 2 >= len(self.token_list):
+            return None, 0
+        if not _is_symbol(self.token_list[start_idx + 1], ":"):
+            return None, 0
+
+        left = Gather(self.token_list[start_idx]).gather()
+
+        right_guess, offset = node_matcher.match(self.token_list, start_idx + 2)
+
+        left_node, left_offset = node_matcher.match(left, 0)
+        if not left_node:
+            return None, 0
+        if left_offset != len(left):
+            raise Exception(
+                "Invalid key value pair: Left side can't be fully matched: ", left
+            )
+        right_node = right_guess
+        return (
+            XLangASTNode(XLangASTNodeTypes.KEY_VAL, [left_node, right_node]),
+            offset + 2,
+        )
+
+
 @node_matcher.register(priority=21)
 class XLangWhile:
     # 匹配 while xxx xxx
@@ -514,36 +530,47 @@ class XLangOperatorLevel3:
         self.token_list = token_list
 
     def match(self, start_idx):
-        offset = 0
+        # 从右向左搜索运算符
+        offset = len(self.token_list) - start_idx - 1
 
-        left = []
+        # 从末尾向左搜索第一个 && 或 || 运算符
         operation = None
-        last_offset = 0
-        while start_idx + offset < len(self.token_list):
-            if _is_symbol(self.token_list[start_idx + offset], "&&") or _is_symbol(
-                self.token_list[start_idx + offset], "||"
+        operation_pos = -1
+
+        while offset >= 0:
+            pos = start_idx + offset
+            if _is_symbol(self.token_list[pos], "&&") or _is_symbol(
+                self.token_list[pos], "||"
             ):
-                node, node_offset = node_matcher.match(left, 0)
-                if not node:
-                    return None, 0
-                if node_offset != len(left):
-                    return None, 0
-                operation = self.token_list[start_idx + offset][0]["token"]
-                offset += 1
-                last_offset = offset
-                left = node
+                operation = self.token_list[pos][0]["token"]
+                operation_pos = pos
                 break
-            else:
-                left.append(self.token_list[start_idx + offset])
-                offset += 1
+            offset -= 1
+
         if operation is None:
+            return None, 0  # 没有找到运算符
+
+        # 左侧部分
+        left_tokens = self.token_list[start_idx:operation_pos]
+        # 右侧部分
+        right_tokens = self.token_list[operation_pos + 1 :]
+
+        # 解析左侧表达式
+        left_node, left_offset = node_matcher.match(left_tokens, 0)
+        if not left_node or left_offset != len(left_tokens):
             return None, 0
-        node, node_offset = node_matcher.match(self.token_list, last_offset + start_idx)
-        if not node:
+
+        # 解析右侧表达式
+        right_node, right_offset = node_matcher.match(right_tokens, 0)
+        if not right_node or right_offset != len(right_tokens):
             return None, 0
+
+        # 构建操作节点
         return (
-            XLangASTNode(XLangASTNodeTypes.OPERATION, [left, operation, node]),
-            last_offset + node_offset,
+            XLangASTNode(
+                XLangASTNodeTypes.OPERATION, [left_node, operation, right_node]
+            ),
+            len(self.token_list) - start_idx,  # 返回整个匹配长度
         )
 
 
@@ -554,41 +581,52 @@ class XLangOperatorLevel2:
         self.token_list = token_list
 
     def match(self, start_idx):
-        offset = 0
+        # 从右向左搜索运算符
+        offset = len(self.token_list) - start_idx - 1
 
-        left = []
+        # 从末尾向左搜索第一个比较运算符
         operation = None
-        last_offset = 0
-        while start_idx + offset < len(self.token_list):
+        operation_pos = -1
+
+        while offset >= 0:
+            pos = start_idx + offset
             if (
-                _is_symbol(self.token_list[start_idx + offset], ">")
-                or _is_symbol(self.token_list[start_idx + offset], "<")
-                or _is_symbol(self.token_list[start_idx + offset], ">=")
-                or _is_symbol(self.token_list[start_idx + offset], "<=")
-                or _is_symbol(self.token_list[start_idx + offset], "==")
-                or _is_symbol(self.token_list[start_idx + offset], "!=")
+                _is_symbol(self.token_list[pos], ">")
+                or _is_symbol(self.token_list[pos], "<")
+                or _is_symbol(self.token_list[pos], ">=")
+                or _is_symbol(self.token_list[pos], "<=")
+                or _is_symbol(self.token_list[pos], "==")
+                or _is_symbol(self.token_list[pos], "!=")
             ):
-                node, node_offset = node_matcher.match(left, 0)
-                if not node:
-                    return None, 0
-                if node_offset != len(left):
-                    return None, 0
-                operation = self.token_list[start_idx + offset][0]["token"]
-                offset += 1
-                last_offset = offset
-                left = node
+                operation = self.token_list[pos][0]["token"]
+                operation_pos = pos
                 break
-            else:
-                left.append(self.token_list[start_idx + offset])
-                offset += 1
+            offset -= 1
+
         if operation is None:
+            return None, 0  # 没有找到运算符
+
+        # 左侧部分
+        left_tokens = self.token_list[start_idx:operation_pos]
+        # 右侧部分
+        right_tokens = self.token_list[operation_pos + 1 :]
+
+        # 解析左侧表达式
+        left_node, left_offset = node_matcher.match(left_tokens, 0)
+        if not left_node or left_offset != len(left_tokens):
             return None, 0
-        node, node_offset = node_matcher.match(self.token_list, last_offset + start_idx)
-        if not node:
+
+        # 解析右侧表达式
+        right_node, right_offset = node_matcher.match(right_tokens, 0)
+        if not right_node or right_offset != len(right_tokens):
             return None, 0
+
+        # 构建操作节点
         return (
-            XLangASTNode(XLangASTNodeTypes.OPERATION, [left, operation, node]),
-            last_offset + node_offset,
+            XLangASTNode(
+                XLangASTNodeTypes.OPERATION, [left_node, operation, right_node]
+            ),
+            len(self.token_list) - start_idx,  # 返回整个匹配长度
         )
 
 
@@ -599,37 +637,111 @@ class XLangOperatorLevel1:
         self.token_list = token_list
 
     def match(self, start_idx):
-        # 后向匹配，先搜索+和-
-        offset = 0
+        # 从右向左搜索运算符
+        offset = len(self.token_list) - start_idx - 1
 
-        left = []
+        # 从末尾向左搜索第一个 + 或 - 运算符
         operation = None
-        last_offset = 0
-        while start_idx + offset < len(self.token_list):
-            if _is_symbol(self.token_list[start_idx + offset], "+") or _is_symbol(
-                self.token_list[start_idx + offset], "-"
+        operation_pos = -1
+
+        while offset >= 0:
+            pos = start_idx + offset
+            if _is_symbol(self.token_list[pos], "+") or _is_symbol(
+                self.token_list[pos], "-"
             ):
-                node, node_offset = node_matcher.match(left, 0)
-                if not node:
-                    return None, 0
-                if node_offset != len(left):
-                    return None, 0
-                operation = self.token_list[start_idx + offset][0]["token"]
-                offset += 1
-                last_offset = offset
-                left = node
+                operation = self.token_list[pos][0]["token"]
+                operation_pos = pos
+                # 判断是否为一元运算符
+                is_unary = False
+
+                # 检查是否在表达式起始位置
+                if operation_pos == start_idx:
+                    is_unary = True
+                # 检查前一个token是否为运算符或者左括号等，表明这是一个一元运算符
+                elif operation_pos > start_idx:
+                    prev_token = self.token_list[operation_pos - 1]
+                    if len(prev_token) == 1 and prev_token[0][
+                        "type"
+                    ] == XLangTokenType.TokenType_SYMBOL and prev_token[0]["token"] in [
+                        "+",
+                        "-",
+                        "*",
+                        "/",
+                        "%",
+                        "&&",
+                        "||",
+                        "==",
+                        "!=",
+                        "<",
+                        ">",
+                        "<=",
+                        ">="
+                    ]:
+                        is_unary = True
+
+                # 如果是一元运算符，继续搜索，否则退出循环
+                if is_unary and operation_pos > start_idx:
+                    offset -= 1
+                    continue
                 break
-            else:
-                left.append(self.token_list[start_idx + offset])
-                offset += 1
+            offset -= 1
+
         if operation is None:
+            return None, 0  # 没有找到运算符
+
+        # 左侧部分
+        left_tokens = self.token_list[start_idx:operation_pos]
+        # 右侧部分
+        right_tokens = self.token_list[operation_pos + 1 :]
+
+        # 特殊处理一元运算符（+x, -x）的情况
+        if len(left_tokens) == 0 or (
+            operation_pos > start_idx
+            and self.token_list[operation_pos - 1][0]["type"]
+            == XLangTokenType.TokenType_SYMBOL
+            and self.token_list[operation_pos - 1][0]["token"]
+            in [
+                "+",
+                "-",
+                "*",
+                "/",
+                "%",
+                "&&",
+                "||",
+                "==",
+                "!=",
+                "<",
+                ">",
+                "<=",
+                ">=",
+            ]
+        ):
+            # 解析右侧表达式
+            right_node, right_offset = node_matcher.match(right_tokens, 0)
+            if not right_node or right_offset != len(right_tokens):
+                return None, 0
+
+            return (
+                XLangASTNode(XLangASTNodeTypes.OPERATION, [operation, right_node]),
+                len(self.token_list) - start_idx,
+            )
+
+        # 解析左侧表达式
+        left_node, left_offset = node_matcher.match(left_tokens, 0)
+        if not left_node or left_offset != len(left_tokens):
             return None, 0
-        node, node_offset = node_matcher.match(self.token_list, last_offset + start_idx)
-        if not node:
+
+        # 解析右侧表达式
+        right_node, right_offset = node_matcher.match(right_tokens, 0)
+        if not right_node or right_offset != len(right_tokens):
             return None, 0
+
+        # 构建操作节点
         return (
-            XLangASTNode(XLangASTNodeTypes.OPERATION, [left, operation, node]),
-            last_offset + node_offset,
+            XLangASTNode(
+                XLangASTNodeTypes.OPERATION, [left_node, operation, right_node]
+            ),
+            len(self.token_list) - start_idx,  # 返回整个匹配长度
         )
 
 
@@ -640,69 +752,49 @@ class XLangOperatorLevel0:
         self.token_list = token_list
 
     def match(self, start_idx):
-        # 后向匹配，先搜索*、/和%
-        offset = 0
+        # 从右向左搜索运算符
+        offset = len(self.token_list) - start_idx - 1
 
-        left = []
+        # 从末尾向左搜索第一个 *、/ 或 % 运算符
         operation = None
-        last_offset = 0
-        while start_idx + offset < len(self.token_list):
+        operation_pos = -1
+
+        while offset >= 0:
+            pos = start_idx + offset
             if (
-                _is_symbol(self.token_list[start_idx + offset], "*")
-                or _is_symbol(self.token_list[start_idx + offset], "/")
-                or _is_symbol(self.token_list[start_idx + offset], "%")
+                _is_symbol(self.token_list[pos], "*")
+                or _is_symbol(self.token_list[pos], "/")
+                or _is_symbol(self.token_list[pos], "%")
             ):
-                node, node_offset = node_matcher.match(left, 0)
-                if not node:
-                    return None, 0
-                if node_offset != len(left):
-                    return None, 0
-                operation = self.token_list[start_idx + offset][0]["token"]
-                offset += 1
-                last_offset = offset
-                left = node
+                operation = self.token_list[pos][0]["token"]
+                operation_pos = pos
                 break
-            else:
-                left.append(self.token_list[start_idx + offset])
-                offset += 1
+            offset -= 1
+
         if operation is None:
+            return None, 0  # 没有找到运算符
+
+        # 左侧部分
+        left_tokens = self.token_list[start_idx:operation_pos]
+        # 右侧部分
+        right_tokens = self.token_list[operation_pos + 1 :]
+
+        # 解析左侧表达式
+        left_node, left_offset = node_matcher.match(left_tokens, 0)
+        if not left_node or left_offset != len(left_tokens):
             return None, 0
-        node, node_offset = node_matcher.match(self.token_list, last_offset + start_idx)
-        if not node:
+
+        # 解析右侧表达式
+        right_node, right_offset = node_matcher.match(right_tokens, 0)
+        if not right_node or right_offset != len(right_tokens):
             return None, 0
+
+        # 构建操作节点
         return (
-            XLangASTNode(XLangASTNodeTypes.OPERATION, [left, operation, node]),
-            last_offset + node_offset,
-        )
-
-
-@node_matcher.register(priority=5)
-class XLangFunctionKeyVal:
-    # 匹配 xxx: xxx
-    def __init__(self, token_list):
-        self.token_list = token_list
-
-    def match(self, start_idx):
-        if start_idx + 2 >= len(self.token_list):
-            return None, 0
-        if not _is_symbol(self.token_list[start_idx + 1], ":"):
-            return None, 0
-
-        left = Gather(self.token_list[start_idx]).gather()
-
-        right_guess, offset = node_matcher.match(self.token_list, start_idx + 2)
-
-        left_node, left_offset = node_matcher.match(left, 0)
-        if not left_node:
-            return None, 0
-        if left_offset != len(left):
-            raise Exception(
-                "Invalid key value pair: Left side can't be fully matched: ", left
-            )
-        right_node = right_guess
-        return (
-            XLangASTNode(XLangASTNodeTypes.KEY_VAL, [left_node, right_node]),
-            offset + 2,
+            XLangASTNode(
+                XLangASTNodeTypes.OPERATION, [left_node, operation, right_node]
+            ),
+            len(self.token_list) - start_idx,  # 返回整个匹配长度
         )
 
 
@@ -735,100 +827,122 @@ class XLangFunctionDef:
         return XLangASTNode(XLangASTNodeTypes.FUNCTION_DEF, [left_node, right_node]), 3
 
 
+@node_matcher.register(priority=2)
+class XLangModifier:
+    # 匹配 modifier xxx
+    def __init__(self, token_list):
+        self.token_list = token_list
+
+    def match(self, start_idx):
+        if start_idx + 1 >= len(self.token_list):
+            return None, 0
+        if len(self.token_list[start_idx]) == 1 and self.token_list[start_idx][0][
+            "token"
+        ] in ["copy", "ref", "unref"]:
+            node, offset = node_matcher.match(self.token_list, start_idx + 1)
+            if node == None:
+                return None, 0
+            return (
+                XLangASTNode(
+                    XLangASTNodeTypes.MODIFY,
+                    [self.token_list[start_idx][0]["token"], node],
+                ),
+                offset + 1,
+            )
+        return None, 0
+
 @node_matcher.register(priority=3)
 class XLangMemberAccess:
-    """匹配成员访问操作：xxx[xxx] 和 xxx.xxx"""
+    """匹配成员访问操作：xxx[xxx] 和 xxx.xxx 和 xxx(xxx)"""
 
     def __init__(self, token_list):
         self.token_list = token_list
 
     def match(self, start_idx):
-        # 尝试匹配 [] 或 . 或 () 访问操作
-        offset = 0
-        access_points = []  # [(offset, type)] type: '[]' 或 '.'
-        while start_idx + offset < len(self.token_list):
-            if _is_pair(self.token_list[start_idx + offset]):
-                access_points.append((offset, "[]"))
-                offset += 1
-            elif _is_symbol(self.token_list[start_idx + offset], "."):
-                access_points.append((offset, "."))
-                offset += 1
-            elif _is_tuple(self.token_list[start_idx + offset]):
-                access_points.append((offset, "()"))
-                offset += 1
-            else:
-                offset += 1
+        # 从右向左搜索访问操作符
+        offset = len(self.token_list) - start_idx - 1
 
-        if (
-            len(access_points) == 0 or access_points[0][0] == 0
-        ):  # 没有匹配到任何访问操作
-            return None, 0
+        # 从末尾向左搜索第一个 [], . 或 () 操作
+        access_type = None
+        access_pos = -1
 
-        # 寻找最长的有效匹配
-        idx = 0
-        while idx < len(access_points):
-            test_node, test_offset = node_matcher.match(
-                self.token_list[start_idx : start_idx + access_points[idx][0]], 0
-            )
-            if not test_node:
-                return None, 0
-            if test_offset < access_points[idx][0]:
+        while offset >= 0:
+            pos = start_idx + offset
+
+            if _is_pair(self.token_list[pos]):
+                access_type = "[]"
+                access_pos = pos
                 break
-            idx += 1
+            elif pos > start_idx and _is_symbol(self.token_list[pos], "."):
+                access_type = "."
+                access_pos = pos
+                break
+            elif _is_tuple(self.token_list[pos]):
+                access_type = "()"
+                access_pos = pos
+                break
 
-        idx -= 1
-        if idx < 0:
+            offset -= 1
+
+        if access_type is None:
+            return None, 0  # 没有找到访问操作符
+
+        # 左侧部分
+        left_tokens = self.token_list[start_idx:access_pos]
+        if len(left_tokens) == 0:
+            return None, 0
+        # 解析左侧表达式
+        left_node, left_offset = node_matcher.match(left_tokens, 0)
+        if not left_node or left_offset != len(left_tokens):
             return None, 0
 
-        # 处理左侧表达式
-        left = self.token_list[start_idx : start_idx + access_points[idx][0]]
-        left_node, left_offset = node_matcher.match(left, 0)
-        if not left_node or len(left) != left_offset:
-            return None, 0
-
-        access_type = access_points[idx][1]
         if access_type == "[]":
             # 处理索引访问
-            index = Gather(
-                _unwrap_pair(self.token_list[start_idx + access_points[idx][0]])
-            ).gather()
+            index = Gather(_unwrap_pair(self.token_list[access_pos])).gather()
             index_node, index_offset = node_matcher.match(index, 0)
             if not index_node or index_offset != len(index):
                 return None, 0
-            right_node = index_node
 
             return (
-                XLangASTNode(XLangASTNodeTypes.INDEX_OF, [left_node, right_node]),
-                access_points[idx][0] + 1,
+                XLangASTNode(XLangASTNodeTypes.INDEX_OF, [left_node, index_node]),
+                access_pos - start_idx + 1,
             )
+
         elif access_type == "()":
             # 处理函数调用
-            args = Gather(
-                self.token_list[start_idx + access_points[idx][0]]
-            ).gather()
+            args = Gather(self.token_list[access_pos]).gather()
             args_node, args_offset = node_matcher.match(args, 0)
-            if not args_node or args_offset != len(args):
-                return None, 0
-            if args_node.node_type != XLangASTNodeTypes.TUPLE:
-                args_node = XLangASTNode(
-                    XLangASTNodeTypes.TUPLE, [args_node]
-                )  # 单个参数的情况
-            right_node = args_node
+
+            if not args_node:
+                # 处理空参数情况
+                args_node = XLangASTNode(XLangASTNodeTypes.TUPLE, [])
+            elif args_node.node_type != XLangASTNodeTypes.TUPLE:
+                args_node = XLangASTNode(XLangASTNodeTypes.TUPLE, [args_node])
 
             return (
-                XLangASTNode(XLangASTNodeTypes.FUNCTION_CALL, [left_node, right_node]),
-                access_points[idx][0] + 1,
+                XLangASTNode(XLangASTNodeTypes.FUNCTION_CALL, [left_node, args_node]),
+                access_pos - start_idx + 1,
             )
+
         else:  # access_type == '.'
             # 处理属性访问
-            right_node, right_offset = node_matcher.match(
-                self.token_list, start_idx + access_points[idx][0] + 1
-            )
+            if access_pos + 1 >= len(self.token_list):
+                return None, 0
+
+            right_token = self.token_list[access_pos + 1:]
+            right_node, right_offset = node_matcher.match(right_token, 0)
             if not right_node:
                 return None, 0
+            
+            if right_node.node_type == XLangASTNodeTypes.VARIABLE:
+                attr_name = XLangASTNode(XLangASTNodeTypes.STRING, right_node.children)
+
             return (
-                XLangASTNode(XLangASTNodeTypes.GET_ATTR, [left_node, right_node]),
-                access_points[idx][0] + 2,
+                XLangASTNode(
+                    XLangASTNodeTypes.GET_ATTR,
+                    [left_node, attr_name],
+                ),
+                access_pos - start_idx + 1 + right_offset,
             )
 
 

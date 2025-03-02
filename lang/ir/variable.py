@@ -28,68 +28,58 @@ class Int:
     def __add__(self, other):
         if isinstance(other, Int):
             return Int(self.value + other.value)
-        elif isinstance(other, Float):
+        if isinstance(other, Float):
             return Float(self.value + other.value)
-        return NotImplemented
+        return NoneType()
 
     def __sub__(self, other):
-        if isinstance(other, Int):
+        if isinstance(other,  Int):
             return Int(self.value - other.value)
-        elif isinstance(other, Float):
+        if isinstance(other, Float):
             return Float(self.value - other.value)
-        return NotImplemented
+        return NoneType()
 
     def __mul__(self, other):
         if isinstance(other, Int):
             return Int(self.value * other.value)
-        elif isinstance(other, Float):
+        if isinstance(other, Float):
             return Float(self.value * other.value)
-        return NotImplemented
+        return NoneType()
 
     def __truediv__(self, other):
-        if isinstance(other, Int):
+        if isinstance(other, (Int, Float)):
             return Float(self.value / other.value)
-        elif isinstance(other, Float):
-            return Float(self.value / other.value)
-        return NotImplemented
+        return NoneType()
 
     def __eq__(self, other):
-        if not isinstance(other, Int):
-            return False
-        elif not isinstance(other, Float):
-            return False
-        return Bool(self.value == other.value)
-
+        if isinstance(other, (Int, Float)):
+            return Bool(self.value == other.value)
+        return NoneType()
     def __ne__(self, other):
         return Bool(self.value != other.value)
 
     def __lt__(self, other):
-        if isinstance(other, Int):
+        if isinstance(other, (Int, Float)):
             return Bool(self.value < other.value)
-        elif isinstance(other, Float):
-            return Bool(self.value < other.value)
-        return NotImplemented
+        return NoneType()
 
     def __le__(self, other):
-        if isinstance(other, Int):
+        if isinstance(other, (Int, Float)):
             return Bool(self.value <= other.value)
-        elif isinstance(other, Float):
-            return Bool(self.value <= other.value)
-        return NotImplemented
+        return NoneType()
 
     def __gt__(self, other):
-        if isinstance(other, Int):
+        if isinstance(other, (Int, Float)):
             return Bool(self.value > other.value)
-        elif isinstance(other, Float):
-            return Bool(self.value > other.value)
-        return NotImplemented
+        return NoneType()
 
     def __ge__(self, other):
-        if isinstance(other, Int):
+        if isinstance(other, (Int, Float)):
             return Bool(self.value >= other.value)
-        elif isinstance(other, Float):
-            return Bool(self.value >= other.value)
-        return NotImplemented
+        return NoneType()
+
+    def __neg__(self):
+        return Int(-self.value)
 
     def __hash__(self):
         return hash(self.value)
@@ -108,7 +98,7 @@ class Int:
 
     def get_value(self):
         return self
-    
+
     def copy(self):
         return Int(self.value)
 
@@ -173,6 +163,9 @@ class Float:
         if isinstance(other, (Float, Int)):
             return Bool(self.value >= other.value)
         return NotImplemented
+    
+    def __neg__(self):
+        return Float(-self.value)
 
     def __hash__(self):
         return hash(self.value)
@@ -216,6 +209,9 @@ class Bool:
 
     def __ne__(self, other):
         return Bool(self.value != other.value)
+    
+    def __not__(self):
+        return Bool(not self.value)
 
     def __bool__(self):
         return self.value
@@ -408,7 +404,7 @@ class Tuple:
 
     def __add__(self, other):
         if not isinstance(other, Tuple):
-            return NotImplemented
+            return NoneType()
         return Tuple(self.values + other.values)
 
     def get_member(self, key):
@@ -427,7 +423,7 @@ class Tuple:
         return Tuple(copyed_values)
 
     def assgin(self, value):
-        self.values = value
+        self.values = value.values
 
     def get_value(self):
         return self
@@ -554,3 +550,31 @@ class BuiltIn:
 
     def get_value(self):
         return self
+
+class Ref:
+    def __init__(self, value):
+        self.value = value
+
+    def __str__(self):
+        return f"Ref({self.value})"
+
+    def __repr__(self):
+        return str(self)
+
+    def copy(self):
+        return Ref(self.value)
+
+    def get_value(self):
+        return self
+
+    def assgin(self, value):
+        self.value = value
+
+    def __eq__(self, other):
+        return Bool(self.value == other.value)
+    
+    def __ne__(self, other):
+        return Bool(self.value != other.value)
+    
+    def unref(self):
+        return self.value

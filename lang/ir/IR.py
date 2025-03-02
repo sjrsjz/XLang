@@ -10,6 +10,7 @@ from .variable import (
     Bool,
     String,
     NoneType,
+    Ref,
     GetAttr,
     IndexOf,
     BuiltIn,
@@ -26,24 +27,26 @@ class IRType(enum.Enum):
     LOAD_STRING = auto()  # 加载字符串到栈
     LOAD_LAMBDA = auto()  # 加载 lambda 函数到栈
     BUILD_TUPLE = auto()  # 构建元组，参数为元组长度
-    BUILD_KEY_VALUE = auto()  # 构建键值对
-    BINARAY_OPERTOR = auto()  # 二元运算符
-    UNARY_OPERATOR = auto()  # 一元运算符
-    LET = auto()  # 定义变量，参数为变量名
-    GET = auto()  # 获取变量，参数为变量名
-    SET = auto()  # 设置变量，为 栈[-1] = 栈[-2]
+    BUILD_KEY_VAL = auto()  # 构建键值对
+    BINARAY_OP = auto()  # 二元运算符
+    UNARY_OP = auto()  # 一元运算符
+    LET_VAL = auto()  # 定义变量，参数为变量名
+    GET_VAL = auto()  # 获取变量，参数为变量名
+    SET_VAL = auto()  # 设置变量，为 栈[-1] = 栈[-2]
     GET_ATTR = auto()  # 获取对象属性
     INDEX_OF = auto()  # 获取元组索引
-    CALL = auto()  # 调用栈顶对象，参数为参数个数
+    CALL_LAMBDA = auto()  # 调用栈顶对象，参数为参数个数
     RETURN = auto()  # 返回栈顶对象
     RETURN_NONE = auto()  # 返回 None
     NEW_FRAME = auto()  # 新建帧
     POP_FRAME = auto()  # 弹出帧
-    JUMP = auto()  # 无条件跳转到特定位置
+    JUMP_OFFSET = auto()  # 无条件跳转到特定位置
     JUMP_TO = auto()  # 无条件跳转到特定位置
     JUMP_IF_FALSE = auto()  # 如果栈顶为真则跳转
     RESET_STACK = auto()  # 重置栈
-
+    COPY_VAL = auto() # 复制值
+    REF_VAL = auto() # 引用值
+    UNREF_VAL = auto() # 取消引用值
 
 class IR:
     def __init__(self, ir_type, value=None):
@@ -51,7 +54,9 @@ class IR:
         self.value = value
 
     def __str__(self):
-        return f"IR({self.ir_type}, {self.value})"
+        if self.value is None:
+            return f"{self.ir_type.name}"
+        return f"{self.ir_type.name}:\t{self.value}"
 
     def __repr__(self):
         return str(self)
@@ -104,33 +109,135 @@ def create_builtins(context):
         elif isinstance(obj, String):
             return Int(len(obj.value))
         else:
-            raise ValueError(f"Object: {obj} has no length")
+            raise ValueError(f"len function's argument must be Tuple or String, but got {obj}")
 
     def type_func(args):
         obj = args[0]
         return String(type(obj).__name__)
-    
+
     def int_func(args):
         obj = args[0]
         return Int(int(obj.value))
-    
+
     def float_func(args):
         obj = args[0]
         return Float(float(obj.value))
-    
+
     def str_func(args):
         obj = args[0]
         return String(str(obj.value))
-    
+
     def bool_func(args):
         obj = args[0]
         return Bool(bool(obj.value))
-    
+
     def range_func(args):
         start = args[0]
         end = args[1]
-        step = args[2] if len(args) > 2 else 1
+        step = args[2] if len(args) > 2 else Int(1)
         return Tuple([Int(i) for i in range(start.value, end.value, step.value)])
+
+    def del_func(args):
+        value = args[0]
+        key = args[1]
+        if isinstance(value, Tuple):
+            value.values.pop(key.value)
+        elif isinstance(value, String):
+            value.value = value.value[:key.value] + value.value[key.value + 1:]
+        else:
+            raise ValueError(f"Delete function's first argument must be Tuple or String, but got {value}")
+        return NoneType()
+
+    def replace_func(args):
+        value = args[0]
+        key_value = args[1]
+        if not isinstance(key_value, KeyValue):
+            raise ValueError(f"Replace function's second argument must be KeyValue, but got {key_value}")
+        key = key_value.key
+        new_value = key_value.value
+        if isinstance(key, Int):
+            if isinstance(value, Tuple):
+                if key.value < 0 or key.value >= len(value.values):
+                    raise ValueError(f"Index out of range: {key.value}/{len(value.values)}")
+                value.values[key.value] = new_value
+            elif isinstance(value, String):
+                if key.value < 0 or key.value >= len(value.value):
+                    raise ValueError(f"Index out of range: {key.value}/{len(value.value)}")
+                value.value = value.value[:key.value] + new_value.value + value.value[key.value + 1:]
+            else:
+                raise ValueError(f"Replace function's first argument must be Tuple or String, but got {value}")
+        elif isinstance(key, String):
+            if not isinstance(value, Tuple):
+                raise ValueError(f"Replace function's first argument must be Tuple, but got {value}")
+            for i, v in enumerate(value.values):
+                if isinstance(v, KeyValue) and v.key == key:
+                    value.values[i] = KeyValue(key, new_value)
+                    return NoneType()
+        else:
+            raise ValueError(f"Replace function's second argument must be Int or String, but got {key}")
+
+    def sum_func(args):
+        obj = args[0]
+        if not isinstance(obj, Tuple):
+            raise ValueError(f"sum function's argument must be Tuple, but got {obj}")
+
+        sum_value = NoneType()
+        for v in obj.values:
+            if not isinstance(v, Int) and not isinstance(v, Float) and not isinstance(v, String):
+                raise ValueError(f"sum function's element must be Int or Float or String, but got {v}")
+            if isinstance(sum_value, NoneType):
+                sum_value = v
+                continue
+            if isinstance(v, String) and not isinstance(sum_value, String):
+                sum_value = String(str(sum_value.value))
+            if isinstance(sum_value, String) and not isinstance(v, String):
+                v = String(str(v.value))            
+            sum_value = sum_value + v
+        return sum_value            
+
+    def max_func(args):
+        obj = args[0]
+        if not isinstance(obj, Tuple):
+            raise ValueError(f"max function's argument must be Tuple, but got {obj}")
+
+        max_value = obj.values[0]
+        for v in obj.values:
+            if not isinstance(v, Int) and not isinstance(v, Float):
+                raise ValueError(f"max function's element must be Int or Float, but got {v}")
+            if v > max_value:
+                max_value = v
+        return max_value
+
+    def min_func(args):
+        obj = args[0]
+        if not isinstance(obj, Tuple):
+            raise ValueError(f"min function's argument must be Tuple, but got {obj}")
+
+        min_value = obj.values[0]
+        for v in obj.values:
+            if not isinstance(v, Int) and not isinstance(v, Float):
+                raise ValueError(f"min function's element must be Int or Float, but got {v}")
+            if v < min_value:
+                min_value = v
+        return min_value
+
+    def slice_func(args):
+        obj = args[0]
+        start = args[1]
+        end = args[2]
+        if not isinstance(start, Int):
+            raise ValueError(f"slice function's second argument must be Int, but got {start}")
+        if not isinstance(end, Int):
+            raise ValueError(f"slice function's third argument must be Int, but got {end}")
+        if isinstance(obj, Tuple):
+            return Tuple(obj.values[start.value:end.value])
+        elif isinstance(obj, String):
+            return String(obj.value[start.value:end.value])
+        else:
+            raise ValueError(f"slice function's first argument must be Tuple or String, but got {obj}")
+
+    def repr_func(args):
+        return String(repr(args[0]))
 
     context.let("print", BuiltIn(print_func))
     context.let("input", BuiltIn(input_func))
@@ -141,7 +248,13 @@ def create_builtins(context):
     context.let("str", BuiltIn(str_func))
     context.let("bool", BuiltIn(bool_func))
     context.let("range", BuiltIn(range_func))
-
+    context.let("del", BuiltIn(del_func))
+    context.let("replace", BuiltIn(replace_func))
+    context.let("sum", BuiltIn(sum_func))
+    context.let("max", BuiltIn(max_func))
+    context.let("min", BuiltIn(min_func))
+    context.let("slice", BuiltIn(slice_func))
+    context.let("repr", BuiltIn(repr_func))
 
 class IRExecutor:
     def __init__(self, functions):
@@ -164,8 +277,8 @@ class IRExecutor:
                 # print(f"ip: {self.ip}, ir: {instr}, stack: {self.stack}")
         except Exception as e:
             print(f"Error: {traceback.format_exc()}")
-            print(f"ip: {self.ip}, ir: {instr}, stack: {self.stack}")
-            print(self.context)
+            print(f"ip: {self.ip}, ir: {instr}")
+            self.context.print_stack_and_frames(self.stack)
 
         self.context.pop_frame(self.stack)
 
@@ -196,12 +309,12 @@ class IRExecutor:
                 values.insert(0, self.stack.pop())
             self.stack.append(Tuple(values))
 
-        elif instr.ir_type == IRType.BUILD_KEY_VALUE:
+        elif instr.ir_type == IRType.BUILD_KEY_VAL:
             value = self.stack.pop()
             key = self.stack.pop()
             self.stack.append(KeyValue(key, value))
 
-        elif instr.ir_type == IRType.BINARAY_OPERTOR:
+        elif instr.ir_type == IRType.BINARAY_OP:
             right = self.stack.pop().get_value()
             left = self.stack.pop().get_value()
             op = instr.value
@@ -227,7 +340,7 @@ class IRExecutor:
             elif op == ">=":
                 self.stack.append(left >= right)
 
-        elif instr.ir_type == IRType.UNARY_OPERATOR:
+        elif instr.ir_type == IRType.UNARY_OP:
             value = self.stack.pop().get_value()
             op = instr.value
 
@@ -235,20 +348,22 @@ class IRExecutor:
                 self.stack.append(-value)
             elif op == "not":
                 self.stack.append(not value)
+            else:
+                raise ValueError(f"Unknown unary operator: {op}")
 
-        elif instr.ir_type == IRType.LET:
+        elif instr.ir_type == IRType.LET_VAL:
             value = self.stack.pop()
             self.context.let(instr.value, value.get_value())
 
-        elif instr.ir_type == IRType.GET:
+        elif instr.ir_type == IRType.GET_VAL:
             self.stack.append(self.context.get(instr.value))
 
-        elif instr.ir_type == IRType.SET:
+        elif instr.ir_type == IRType.SET_VAL:
             value = self.stack.pop()
             key = self.stack.pop()
             key.assgin(value.get_value())
 
-        elif instr.ir_type == IRType.CALL:
+        elif instr.ir_type == IRType.CALL_LAMBDA:
             arg_tuple = self.stack.pop().get_value()
             func = self.stack.pop().get_value()
             if isinstance(func, BuiltIn):
@@ -297,7 +412,7 @@ class IRExecutor:
             # print("pop frame")
             self.context.pop_frame(self.stack)
 
-        elif instr.ir_type == IRType.JUMP:
+        elif instr.ir_type == IRType.JUMP_OFFSET:
             self.ip += instr.value
 
         elif instr.ir_type == IRType.JUMP_IF_FALSE:
@@ -322,3 +437,16 @@ class IRExecutor:
 
         elif instr.ir_type == IRType.RESET_STACK:
             del self.stack[self.context.stack_pointers[-1] + 1 :]
+
+        elif instr.ir_type == IRType.COPY_VAL:
+            self.stack.append(self.stack.pop().get_value().copy())
+
+        elif instr.ir_type == IRType.REF_VAL:
+            self.stack.append(Ref(self.stack.pop()))
+
+        elif instr.ir_type == IRType.UNREF_VAL:
+            v = self.stack.pop().get_value()
+            if isinstance(v, Ref):
+                self.stack.append(v.unref())
+            else:
+                raise ValueError(f"Can't unref non-ref value: {v}")

@@ -16,14 +16,14 @@ def test():
     objectA := (
         'memberA': '才是',
         'functionA': ('concator': functionA, 'arg1': null, 'arg2': null) -> {
-            return concator(arg1, self.'memberA') + arg2
+            return concator(arg1, self.memberA) + arg2
         }
     );
 
     left := '我是';
     right := '奶龙';
 
-    methodA := objectA.'functionA';
+    methodA := objectA.functionA;
     result := methodA('arg1': left, 'arg2': right);
     
     print(functionA(left, right), result);
@@ -83,7 +83,7 @@ BuiltIn := () -> {
     )
 };
 
-BuiltIn()."print"("Hello, World!");
+BuiltIn().print("Hello, World!");
 """
 
     code = """
@@ -110,17 +110,94 @@ ClassBuilder := () -> {
     return (
         'member': 1,
         'method': () -> {
-            return self.'member';
+            return self.member;
         },
     );
 };
 
 object := ClassBuilder();
-print(object.'method'());
-object.'member' = 2;
-lambda := object.'method';
+print(object.method());
+object.member = 2;
+lambda := object.method;
 print(lambda());
 """
+
+    code = """
+    print("输入一个数字:");
+    num := float(input());
+    print("输入一个数字:");
+    num2 := float(input());
+    print("输入运算符:(+,-,*,/)");
+    operator := input();
+    if (operator == "+") {
+        print(num + num2);
+    } else if (operator == "-") {
+        print(num - num2);
+    } else if (operator == "*") {
+        print(num * num2);
+    } else if (operator == "/") {
+        print(num / num2);
+    } else {
+        print("不支持的运算符");
+    };
+    
+    """
+
+    code = """
+    listA := range(0, 10);
+    print(max(listA));
+    print(min(listA));
+    print(sum(listA));
+    listB := ('A', 'B', 'C');
+    print(len(listB));
+    print(listB[0]);
+    print(sum(listB));
+    """
+
+    code = """  
+    map := ('tuple':null, 'map_func': ('v':null) -> {return v}) -> {
+        result := ();
+        idx := 0;
+        while (idx < len(tuple)) {
+            result = result + (map_func(tuple[idx]),);
+            idx = idx + 1;
+        };
+        return result;
+    };
+
+    tuple := range(0, 10);
+    mapped := map(tuple, ('v':null) -> {return v * v;});
+
+    print(repr(mapped[1 + -1]));
+    """
+
+    code = """
+    iter:= ('container': null) -> {
+        return (
+            'container': container,
+            'idx': 0,
+            'next': () -> {
+                if (self.idx <= len( self.container) - 1) {
+                    self.idx = self.idx + 1;
+                    return true;
+                } else {
+                    return false;
+                }
+            },
+            'get': () -> {
+                return  self.container[self.idx - 1];
+            },        
+        );
+    };
+
+    container := range(0, 100);
+    iterA := iter( container);
+    
+    while (iterA.next()) {
+        print(iterA.get());
+    };
+
+    """
 
 
 

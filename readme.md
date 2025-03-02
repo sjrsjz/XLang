@@ -15,7 +15,7 @@ X Lang 是一种轻量级、动态类型的脚本语言，结合了函数式和�
 注意：
 
 - 元组在构建时会遍历所有元素，如果元素是Lambda类型，会将元组自身引用传递给Lambda的caller(self)，这样Lambda就可以访问元组的成员
-- xxx.'name' 语法是一个组合语法，如果xxx是元组，会遍历元组的所有元素并对元素执行键值比较，也就是说当且仅当元组元素是键值对且键等于'name'时才返回该元素的值
+- xxx.'name' 语法是一个组合语法，如果xxx是元组，会遍历元组的所有元素并对元素执行键值比较，也就是说当且仅当元组元素是键值对且键等于'name'时才返回该元素的值。如果 name 被AST解析成变量，会强制替换成字符串以适配更简略的语法
 
 ### 基本语法
 
@@ -59,6 +59,17 @@ while (A < 10) {
     A = A + 1;
 }
 
+if (operator == "+") { // else if组合式语法
+    ...
+} else if (operator == "-") {
+    ...
+} else if (operator == "*") {
+    ...
+} else if (operator == "/") {
+    ...
+} else {
+    ...
+}
 ```
 
 ### 字符串
@@ -83,16 +94,16 @@ print(add(5, 3));  // 输出: 8
 person := (
     'name': 'Alice',
     'greet': ('message': 'Hello') -> {
-        return message + ", " + self.'name' + "!";
+        return message + ", " + self.name + "!";
     }
 );
-print(person.'greet'());  // 输出: Hello, Alice!
+print(person.greet());  // 输出: Hello, Alice!
 
-method := person.'greet';
+method := person.greet;
 print(method());  // 输出: Hello, Alice!
 ```
 
-method := person.'greet' 是一个极其重要的特性，它允许我们将对象的方法赋值给一个变量，然后像普通函数一样调用，而且仍然可以访问对象的成员。
+method := person.greet 是一个极其重要的特性，它允许我们将对象的方法赋值给一个变量，然后像普通函数一样调用，而且仍然可以访问对象的成员。
 
 ### 闭包和状态
 

@@ -58,6 +58,45 @@ class Context:
         return str(self)
 
     def __del__(self):
-        if len(self.frames) > 0:
-            raise Exception("Context not clean: frames not empty\n" + str(self.frames))
+        #if len(self.frames) > 0:
+        #    raise Exception("Context not clean: frames not empty\n" + str(self.frames))
         del self.frames
+
+    def print_stack_and_frames(self, stack):
+        print("\n===== Stack and Frames =====")
+        
+        # 打印堆栈元素
+        print("\nStack:")
+        if not stack:
+            print("  [Empty]")
+        else:
+            for i, item in enumerate(stack):
+                print(f"  [{i}] {type(item).__name__}: {item}")
+        
+        # 打印栈指针
+        print("\nStack Pointers:")
+        if not self.stack_pointers:
+            print("  [Empty]")
+        else:
+            for i, pointer in enumerate(self.stack_pointers):
+                print(f"  Frame {i} -> {pointer}")
+        
+        # 打印变量帧
+        print("\nFrames")
+        if not self.frames:
+            print("  [Empty]")
+        else:
+            for i, (frame, is_func) in enumerate(self.frames):
+                frame_type = "function" if is_func else "normal"
+                print(f"  frame {i} ({frame_type}):")
+                if not frame:
+                    print("    [Empty]")
+                else:
+                    for var_name, var_value in frame.items():
+                        value_type = type(var_value).__name__
+                        value_repr = str(var_value)
+                        if len(value_repr) > 70:  # 截断过长的输出
+                            value_repr = value_repr[:67] + "..."
+                        print(f"    {var_name} = {value_repr}")
+        
+        print("\n===== End =====")
