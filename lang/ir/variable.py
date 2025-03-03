@@ -93,7 +93,7 @@ class Int:
     def assgin(self, value):
         self.value = value.value
 
-    def get_value(self):
+    def object_ref(self):
         return self
 
     def copy(self):
@@ -176,7 +176,7 @@ class Float:
     def assgin(self, value):
         self.value = value.value
 
-    def get_value(self):
+    def object_ref(self):
         return self
     
     def copy(self):
@@ -219,7 +219,7 @@ class Bool:
     def assgin(self, value):
         self.value = value.value
 
-    def get_value(self):
+    def object_ref(self):
         return self
     
     def copy(self):
@@ -269,7 +269,7 @@ class String:
     def assgin(self, value):
         self.value = value.value
 
-    def get_value(self):
+    def object_ref(self):
         return self
 
     def copy(self):
@@ -294,7 +294,7 @@ class NoneType:
     def __ne__(self, other):
         return Bool(not isinstance(other, NoneType))
 
-    def get_value(self):
+    def object_ref(self):
         return self
 
     def assgin(self, value):
@@ -319,17 +319,15 @@ class KeyValue:
         return self.key.value == key.value
 
     def copy(self):
-        if hasattr(self.value, "copy"):
-            return KeyValue(self.key, self.value.copy())
-        return KeyValue(self.key, self.value)
+        return KeyValue(self.key.copy(), self.value.copy())
 
     def assgin(self, value):
         self.value = value
 
-    def get_value(self):
+    def object_ref(self):
         return self
     def get_member(self, key):
-        return self.value.get_member(key)
+        return self.value.object_ref().get_member(key)
 
 class Lambda:
     def __init__(self, captured_val, default_args_tuple, signature):
@@ -344,16 +342,13 @@ class Lambda:
     def __repr__(self):
         return str(self)
 
-    def copy(self):
-        return Lambda(self.captured_val, self.signature)
-
     def assgin(self, o):
-        self.captured_val = o.args.copy()
-        self.signature = o.body
+        self.captured_val = o.captured_val
+        self.signature = o.signature
 
-    def get_value(self):
+    def object_ref(self):
         return self
-    
+
     def copy(self):
         return Lambda(self.captured_val, self.default_args_tuple.copy(), self.signature)
 
@@ -405,9 +400,6 @@ class Tuple:
                 return value.value
         raise KeyError(f"'{key}' not found in Tuple")
 
-    def __getattr__(self, key):
-        return self.get_member(key)
-
     def copy(self):
         copyed_values = []
         for value in self.values:
@@ -415,9 +407,9 @@ class Tuple:
         return Tuple(copyed_values)
 
     def assgin(self, value):
-        self.values = value.values
+        self.values = value.values.copy() # 浅拷贝
 
-    def get_value(self):
+    def object_ref(self):
         return self
 
     def assgin_members(self, tuple):
@@ -465,9 +457,9 @@ class Tuple:
             if normal_index < len(self.values):
                 # 找到位置，进行赋值
                 if hasattr(self.values[normal_index], "assgin") and hasattr(
-                    value, "get_value"
+                    value, "object_ref"
                 ):
-                    self.values[normal_index].assgin(value.get_value())
+                    self.values[normal_index].assgin(value.object_ref())
                 else:
                     self.values[normal_index] = value
                 normal_index += 1
@@ -488,13 +480,13 @@ class GetAttr:
         return str(self)
 
     def copy(self):
-        return GetAttr(self.obj.copy(), self.key)
+        return self.obj.copy()
 
-    def get_value(self):
-        return self.obj.get_value().get_member(self.key)
+    def object_ref(self):
+        return self.obj.object_ref().get_member(self.key).object_ref()
 
     def assgin(self, value):
-        self.obj.get_value().get_member(self.key).assgin(value)
+        self.object_ref().assgin(value)
 
 
 class IndexOf:
@@ -512,13 +504,13 @@ class IndexOf:
         return self.obj.values[self.index]
 
     def copy(self):
-        return IndexOf(self.obj.copy(), self.index)
+        return self.obj.copy()
 
-    def get_value(self):
-        return self.obj.get_value().values[self.index]
+    def object_ref(self):
+        return self.obj.object_ref().values[self.index].object_ref()
 
     def assgin(self, value):
-        self.obj.get_value().values[self.index].assgin(value)
+        self.object_ref().assgin(value)
 
 
 class BuiltIn:
@@ -534,13 +526,13 @@ class BuiltIn:
     def call(self, arg_tuple):
         args = []
         for arg in arg_tuple:
-            args.append(arg.get_value())
+            args.append(arg.object_ref())
         return self.func(args)
 
     def copy(self):
         return BuiltIn(self.func)
 
-    def get_value(self):
+    def object_ref(self):
         return self
 
 class Ref:
@@ -556,7 +548,7 @@ class Ref:
     def copy(self):
         return Ref(self.value)
 
-    def get_value(self):
+    def object_ref(self):
         return self
 
     def assgin(self, value):
@@ -583,10 +575,10 @@ class Named:
         return str(self)
 
     def copy(self):
-        return Named(self.key, self.value)
+        return Named(self.key.copy(), self.value.copy())
 
-    def get_value(self):
-        return self.value.get_value()
+    def object_ref(self):
+        return self
 
     def assgin(self, value):
         self.value = value
@@ -596,7 +588,7 @@ class Named:
     
     def get_member(self, key):
         return self.value.get_member(key)
-    
+
 class Variable:
     # 包装变量，用于在 Context 中存储变量
     def __init__(self, value):
@@ -609,11 +601,10 @@ class Variable:
         return str(self)
     
     def copy(self):
-        return Variable(self.value.copy())
+        return self.value.copy()
     
-    def get_value(self):
-        return self.value.get_value()
+    def object_ref(self):
+        return self.value.object_ref()
     
     def assgin(self, value):
         self.value = value
-    

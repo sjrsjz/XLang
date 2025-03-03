@@ -345,24 +345,24 @@ class IRExecutor:
             self.stack.append(NoneType())
 
         elif instr.ir_type == IRType.LOAD_LAMBDA:
-            default_args = self.stack.pop().get_value()  # 获取默认参数，这里是一个tuple
+            default_args = self.stack.pop().object_ref()  # 获取默认参数，这里是一个tuple
             self.stack.append(Lambda(None, default_args, instr.value))
 
         elif instr.ir_type == IRType.BUILD_TUPLE:
             count = instr.value
             values = []
             for _ in range(count):
-                values.insert(0, self.stack.pop())
+                values.insert(0, self.stack.pop().object_ref())
             self.stack.append(Tuple(values))
 
         elif instr.ir_type == IRType.BUILD_KEY_VAL:
-            value = self.stack.pop()
-            key = self.stack.pop()
+            value = self.stack.pop().object_ref()
+            key = self.stack.pop().object_ref()
             self.stack.append(KeyValue(key, value))
 
         elif instr.ir_type == IRType.BINARAY_OP:
-            right = self.stack.pop().get_value()
-            left = self.stack.pop().get_value()
+            right = self.stack.pop().object_ref()
+            left = self.stack.pop().object_ref()
             op = instr.value
 
             if op == "+":
@@ -387,7 +387,7 @@ class IRExecutor:
                 self.stack.append(left >= right)
 
         elif instr.ir_type == IRType.UNARY_OP:
-            value = self.stack.pop().get_value()
+            value = self.stack.pop().object_ref()
             op = instr.value
 
             if op == "-":
@@ -399,7 +399,7 @@ class IRExecutor:
 
         elif instr.ir_type == IRType.LET_VAL:
             value = self.stack.pop()
-            self.context.let(instr.value, Variable(value.get_value()))
+            self.context.let(instr.value, Variable(value.object_ref()))
 
         elif instr.ir_type == IRType.GET_VAL:
             self.stack.append(self.context.get(instr.value))
@@ -407,11 +407,11 @@ class IRExecutor:
         elif instr.ir_type == IRType.SET_VAL:
             value = self.stack.pop()
             key = self.stack.pop()
-            key.assgin(value.get_value())
+            key.assgin(value.object_ref())
 
         elif instr.ir_type == IRType.CALL_LAMBDA:
-            arg_tuple = self.stack.pop().get_value()
-            func = self.stack.pop().get_value()
+            arg_tuple = self.stack.pop().object_ref()
+            func = self.stack.pop().object_ref()
             if isinstance(func, BuiltIn):
                 result = func.call(arg_tuple)
                 self.stack.append(result)
@@ -462,7 +462,7 @@ class IRExecutor:
             self.ip += instr.value
 
         elif instr.ir_type == IRType.JUMP_IF_FALSE:
-            condition = self.stack.pop().get_value()
+            condition = self.stack.pop().object_ref()
             if not isinstance(condition, Bool):
                 raise ValueError(f"Condition is not bool: {condition}")
             if not condition.value:
@@ -472,12 +472,12 @@ class IRExecutor:
             self.ip = instr.value
 
         elif instr.ir_type == IRType.GET_ATTR:
-            attr_name = self.stack.pop().get_value()
+            attr_name = self.stack.pop().object_ref()
             obj = self.stack.pop()
             self.stack.append(GetAttr(obj, attr_name))
 
         elif instr.ir_type == IRType.INDEX_OF:
-            index = self.stack.pop().get_value().value
+            index = self.stack.pop().object_ref().value
             obj = self.stack.pop()
             self.stack.append(IndexOf(obj, index))
 
@@ -485,41 +485,41 @@ class IRExecutor:
             del self.stack[self.context.stack_pointers[-1] + 1 :]
 
         elif instr.ir_type == IRType.COPY_VAL:
-            self.stack.append(self.stack.pop().get_value().copy())
+            self.stack.append(self.stack.pop().object_ref().copy())
 
         elif instr.ir_type == IRType.REF_VAL:
             self.stack.append(Ref(self.stack.pop()))
 
         elif instr.ir_type == IRType.DEREF_VAL:
-            v = self.stack.pop().get_value()
+            v = self.stack.pop().object_ref()
             if isinstance(v, Ref):
                 self.stack.append(v.deref())
             else:
                 raise ValueError(f"Can't deref non-ref value: {v}")
 
         elif instr.ir_type == IRType.KEY_OF:
-            obj = self.stack.pop().get_value()
+            obj = self.stack.pop().object_ref()
             if isinstance(obj, KeyValue) or isinstance(obj, Named):
                 self.stack.append(obj.key)
             else:
                 raise ValueError(f"Object is not KeyValue or Named: {obj}")
 
         elif instr.ir_type == IRType.VALUE_OF:
-            obj = self.stack.pop().get_value()
+            obj = self.stack.pop().object_ref()
             if isinstance(obj, KeyValue) or isinstance(obj, Named):
                 self.stack.append(obj.value)
             else:
                 raise ValueError(f"Object is not KeyValue or Named: {obj}")
 
         elif instr.ir_type == IRType.ASSERT:
-            value = self.stack.pop().get_value()
+            value = self.stack.pop().object_ref()
             if not isinstance(value, Bool):
                 raise ValueError(f"Assert value is not Bool: {value}")
             if not value.value:
                 raise ValueError(f"Assert failed")
 
         elif instr.ir_type == IRType.SELF_OF:
-            value = self.stack.pop().get_value()
+            value = self.stack.pop().object_ref()
             if not isinstance(value, Lambda):
                 raise ValueError(f"Object is not Lambda: {value}")
             self.stack.append(value.self_object)

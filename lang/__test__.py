@@ -348,7 +348,7 @@ createTable := (columns => ()) -> {
                     };
                     
                     if (shouldSwap) {
-                        temp := result[j];
+                        temp := copy result[j];
                         result[j] = result[j+1];
                         result[j+1] = temp;
                     };
@@ -369,10 +369,9 @@ createTable := (columns => ()) -> {
             // 打印表头
             i := 0;
             while (i < len(self.columns)) {
-                print(self.columns[i], "\t", end => "");
+                print(self.columns[i]);
                 i = i + 1;
             };
-            print("");
             
             // 打印数据行
             i = 0;
@@ -380,7 +379,7 @@ createTable := (columns => ()) -> {
                 row := rowsToShow[i];
                 j := 0;
                 while (j < len(row)) {
-                    print(row[j], "\t", end => "");
+                    print(row[j]);
                     j = j + 1;
                 };
                 print("");
@@ -407,10 +406,11 @@ employeeTable.display();
 // 查询研发部员工
 deptIndex := employeeTable.getColumnIndex("department");
 print("\n研发部员工:");
-devEmployees := employeeTable.select((row => null) -> {
+devEmployees := employeeTable.select((row => null, deptIndex => deptIndex) -> {
     return row[deptIndex] == "研发部";
 });
 employeeTable.display(devEmployees);
+
 
 // 按薪资排序(降序)
 print("\n按薪资降序排列:");
@@ -424,8 +424,8 @@ nameIndex := employeeTable.getColumnIndex("name");
 salaryIndex := employeeTable.getColumnIndex("salary");
 
 employeeTable.update(
-    (row => null) -> { return row[nameIndex] == "张三"; },
-    (row => null) -> {
+    (row => null, nameIndex => nameIndex) -> { return row[nameIndex] == "张三"; },
+    (row => null, salaryIndex => salaryIndex) -> {
         newRow := row;
         newRow[salaryIndex] = row[salaryIndex] + 2000;
         return newRow;
@@ -433,9 +433,11 @@ employeeTable.update(
 );
 employeeTable.display();
 
+nameIndex := employeeTable.getColumnIndex("name");
+
 // 删除一个员工
 print("\n删除赵六后:");
-employeeTable.delete((row => null) -> { return row[nameIndex] == "赵六"; });
+employeeTable.delete((row => null, nameIndex => nameIndex) -> { return row[nameIndex] == "赵六"; });
 employeeTable.display();
 
 """
