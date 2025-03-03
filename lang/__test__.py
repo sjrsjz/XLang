@@ -210,23 +210,28 @@ print(lambda());
     """
 
     code = """
+    classA := ('v': 0) -> {
+        return 'A': (
+            'member': v,
+            'add': ('value': null) -> {
+                //assert (type(value) == "KeyVal");
+                // assert (keyof value == "A");
+                //self.member = value.member;
+                print(self.member, value.member);
+            },
+        );
+    };
 
-    objectA := (
-        'memberA': 1,
-        'functionA': () -> {
-            return self.memberA;
-        },
-        'set': ('v': 0) -> {
-            self.memberA = v;
-        }
-    );
+    objectA := classA(1);
+    //print(objectA.method());
+    //assert(keyof objectA == "A");
+    //print(repr(valueof((valueof objectA)[1])));
+    //print(repr(selfof objectA.method));
+    //print(type(objectA));
 
-    objectB := objectA;
-    objectC := copy objectA;
-    objectB.set(2);
-    objectC.set(3);
-    print(objectA.memberA, objectB.memberA, objectC.memberA); // 输出 2 2 3
-
+    objectB := classA(2);
+    //objectB.member = 2;
+    objectA.add(objectB);
     """
 
 

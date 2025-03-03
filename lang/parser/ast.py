@@ -838,7 +838,7 @@ class XLangModifier:
             return None, 0
         if len(self.token_list[start_idx]) == 1 and self.token_list[start_idx][0][
             "token"
-        ] in ["copy", "ref", "deref"]:
+        ] in ["copy", "ref", "deref", "keyof", "valueof", "selfof", "assert"]:
             node, offset = node_matcher.match(self.token_list, start_idx + 1)
             if node == None:
                 return None, 0

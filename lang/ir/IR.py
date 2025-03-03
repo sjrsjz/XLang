@@ -35,6 +35,9 @@ class IRType(enum.Enum):
     SET_VAL = auto()  # 设置变量，为 栈[-1] = 栈[-2]
     GET_ATTR = auto()  # 获取对象属性
     INDEX_OF = auto()  # 获取元组索引
+    KEY_OF = auto()  # 获取键值对的值
+    VALUE_OF = auto()  # 获取值
+    SELF_OF = auto()  # 获取 self
     CALL_LAMBDA = auto()  # 调用栈顶对象，参数为参数个数
     RETURN = auto()  # 返回栈顶对象
     RETURN_NONE = auto()  # 返回 None
@@ -47,6 +50,7 @@ class IRType(enum.Enum):
     COPY_VAL = auto() # 复制值
     REF_VAL = auto() # 引用值
     DEREF_VAL = auto() # 取消引用值
+    ASSERT = auto() # 断言
 
 class IR:
     def __init__(self, ir_type, value=None):
@@ -386,13 +390,13 @@ class IRExecutor:
                         raise ValueError(f"Default args must be KeyValue, but got {v}")
                     self.context.let(v.key.value, v.value)
 
-                if func.caller is not None:
-                    self.context.let("self", func.caller)
+                if not isinstance(func.self_object, NoneType):
+                    self.context.let("self", func.self_object)
 
                 ip = self.func_ips[signature]  # 获取函数入口地址
                 self.ip = ip - 1  # -1是因为后面会+1
             else:
-                raise ValueError(f"Object: {self.stack[-1]} is not callable")
+                raise ValueError(f"Object: {func} is not callable")
         elif instr.ir_type == IRType.RETURN:
             result = self.stack.pop()
             self.context.pop_frame(self.stack, exit_func=True)
@@ -450,3 +454,28 @@ class IRExecutor:
                 self.stack.append(v.deref())
             else:
                 raise ValueError(f"Can't deref non-ref value: {v}")
+        
+        elif instr.ir_type == IRType.KEY_OF:
+            obj = self.stack.pop().get_value()
+            if not isinstance(obj, KeyValue):
+                raise ValueError(f"Object is not KeyValue: {obj}")
+            self.stack.append(obj.key)
+
+        elif instr.ir_type == IRType.VALUE_OF:
+            obj = self.stack.pop().get_value()
+            if not isinstance(obj, KeyValue):
+                raise ValueError(f"Object is not KeyValue: {obj}")
+            self.stack.append(obj.value)
+
+        elif instr.ir_type == IRType.ASSERT:
+            value = self.stack.pop().get_value()
+            if not isinstance(value, Bool):
+                raise ValueError(f"Assert value is not Bool: {value}")
+            if not value.value:
+                raise ValueError(f"Assert failed")
+            
+        elif instr.ir_type == IRType.SELF_OF:
+            value = self.stack.pop().get_value()
+            if not isinstance(value, Lambda):
+                raise ValueError(f"Object is not Lambda: {value}")
+            self.stack.append(value.self_object)

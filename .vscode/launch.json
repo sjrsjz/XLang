@@ -6,7 +6,7 @@
             "type": "debugpy",
             "request": "launch",
             "module": "lang.__test__",
-            "console": "integratedTerminal",
+            "console": "internalConsole",
             "justMyCode": false,
             "cwd": "${workspaceFolder}"
         }
