@@ -210,17 +210,22 @@ print(lambda());
     """
 
     code = """
-    A := 1;
-    B := ref A;
-    C := deref B;
-    print(repr(B), repr(C));
 
-    step := ('value': 0) -> {
-        deref value = deref value + 1;
-    };
+    objectA := (
+        'memberA': 1,
+        'functionA': () -> {
+            return self.memberA;
+        },
+        'set': ('v': 0) -> {
+            self.memberA = v;
+        }
+    );
 
-    step(ref A);
-    print(repr(A));
+    objectB := objectA;
+    objectC := copy objectA;
+    objectB.set(2);
+    objectC.set(3);
+    print(objectA.memberA, objectB.memberA, objectC.memberA); // 输出 2 2 3
 
     """
 
