@@ -63,40 +63,38 @@ class Context:
         del self.frames
 
     def print_stack_and_frames(self, stack):
-        print("\n===== Stack and Frames =====")
+        print("\n# Stack and Frames")
         
         # 打印堆栈元素
-        print("\nStack:")
+        print("\n## Stack:")
         if not stack:
-            print("  [Empty]")
+            print("  - <Empty>")
         else:
             for i, item in enumerate(stack):
-                print(f"  [{i}] {type(item).__name__}: {item}")
+                print(f"  - <{i}> {type(item).__name__}: `{item}`")
         
         # 打印栈指针
-        print("\nStack Pointers:")
+        print("\n## Stack Pointers:")
         if not self.stack_pointers:
-            print("  [Empty]")
+            print("  - <Empty>")
         else:
             for i, pointer in enumerate(self.stack_pointers):
-                print(f"  Frame {i} -> {pointer}")
+                print(f"  + Frame {i} -> {pointer}")
         
         # 打印变量帧
-        print("\nFrames")
+        print("\n## Frames")
         if not self.frames:
-            print("  [Empty]")
+            print("  - <Empty>")
         else:
             for i, (frame, is_func) in enumerate(self.frames):
                 frame_type = "function" if is_func else "normal"
-                print(f"  frame {i} ({frame_type}):")
+                print(f"  + frame {i} ({frame_type}):")
                 if not frame:
-                    print("    [Empty]")
+                    print("    - <Empty>")
                 else:
                     for var_name, var_value in frame.items():
                         value_type = type(var_value).__name__
                         value_repr = str(var_value)
                         if len(value_repr) > 70:  # 截断过长的输出
                             value_repr = value_repr[:67] + "..."
-                        print(f"    {var_name} = {value_repr}")
-        
-        print("\n===== End =====")
+                        print(f"    - {var_name} = `{value_repr}`")

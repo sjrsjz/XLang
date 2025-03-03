@@ -14,11 +14,19 @@ class IRGenerator:
         self.function_signture_counter += 1
         return f"{self.namespace}::__function_{self.function_signture_counter}__"
 
+    def generate_debug_info(self, node: XLangASTNode) -> IR:
+        return IR(IRType.DEBUG_INFO, {
+            "code_position": node.node_position,
+        })
+
     def generate(self, node) -> List[IR]:
         node_type = node.node_type
 
+        debug_info = self.generate_debug_info(node)
+
         if node_type == XLangASTNodeTypes.BODY:
             irs = []
+            irs.append(debug_info)
             irs.append(IR(IRType.NEW_FRAME))
             for child in node.children:
                 irs.extend(self.generate(child))
@@ -27,6 +35,7 @@ class IRGenerator:
 
         elif node_type == XLangASTNodeTypes.FUNCTION_DEF:
             irs = []
+            irs.append(debug_info)
             args = node.children[0]
             if args.node_type != XLangASTNodeTypes.TUPLE:
                 args = XLangASTNode(XLangASTNodeTypes.TUPLE, [args])
@@ -50,22 +59,28 @@ class IRGenerator:
 
         elif node_type == XLangASTNodeTypes.ASSIGN:
             irs = []
+            irs.append(debug_info)
             irs.extend(self.generate(node.children[0]))
             irs.extend(self.generate(node.children[1]))
             irs.append(IR(IRType.SET_VAL))
             return irs
 
         elif node_type == XLangASTNodeTypes.VARIABLE:
-            return [IR(IRType.GET_VAL, node.children)]
+            irs = []
+            irs.append(debug_info)
+            irs.append(IR(IRType.GET_VAL, node.children))
+            return irs
 
         elif node_type == XLangASTNodeTypes.LET:
             irs = []
+            irs.append(debug_info)
             irs.extend(self.generate(node.children[1]))
             irs.append(IR(IRType.LET_VAL, node.children[0].children))
             return irs
 
         elif node_type == XLangASTNodeTypes.FUNCTION_CALL:
             irs = []
+            irs.append(debug_info)
             for child in node.children:
                 irs.extend(self.generate(child))
             irs.append(IR(IRType.CALL_LAMBDA))
@@ -73,6 +88,7 @@ class IRGenerator:
 
         elif node_type == XLangASTNodeTypes.OPERATION:
             irs = []
+            irs.append(debug_info)
             if len(node.children) == 2:
                 irs.extend(self.generate(node.children[1]))
                 irs.append(IR(IRType.UNARY_OP, node.children[0]))
@@ -83,12 +99,14 @@ class IRGenerator:
             return irs
         elif node_type == XLangASTNodeTypes.INDEX_OF:
             irs = []
+            irs.append(debug_info)
             irs.extend(self.generate(node.children[0]))
             irs.extend(self.generate(node.children[1]))
             irs.append(IR(IRType.INDEX_OF))
             return irs
         elif node_type == XLangASTNodeTypes.GET_ATTR:
             irs = []
+            irs.append(debug_info)
             irs.extend(self.generate(node.children[0]))
             irs.extend(self.generate(node.children[1]))
             irs.append(IR(IRType.GET_ATTR))
@@ -96,18 +114,23 @@ class IRGenerator:
 
         elif node_type == XLangASTNodeTypes.RETURN:
             irs = []
+            irs.append(debug_info)
             irs.extend(self.generate(node.children))
             irs.append(IR(IRType.RETURN))
             return irs
 
         elif node_type == XLangASTNodeTypes.NUMBER:
+            irs = []
+            irs.append(debug_info)
             if "." in node.children:
-                return [IR(IRType.LOAD_FLOAT, float(node.children))]
+                irs.append(IR(IRType.LOAD_FLOAT, float(node.children)))
             else:
-                return [IR(IRType.LOAD_INT, int(node.children))]
+                irs.append(IR(IRType.LOAD_INT, int(node.children)))
+            return irs
 
         elif node_type == XLangASTNodeTypes.TUPLE:
             irs = []
+            irs.append(debug_info)
             tuple_size = 0
             for child in node.children:
                 if child.node_type == XLangASTNodeTypes.NONE:
@@ -119,30 +142,46 @@ class IRGenerator:
 
         elif node_type == XLangASTNodeTypes.KEY_VAL:
             irs = []
+            irs.append(debug_info)
             irs.extend(self.generate(node.children[0]))
             irs.extend(self.generate(node.children[1]))
             irs.append(IR(IRType.BUILD_KEY_VAL))
             return irs
-
+        elif node_type == XLangASTNodeTypes.NAMED_ARGUMENT:
+            irs = []
+            irs.append(debug_info)
+            irs.extend(self.generate(node.children[0]))
+            irs.extend(self.generate(node.children[1]))
+            irs.append(IR(IRType.BUILD_NAMED))
+            return irs
         elif node_type == XLangASTNodeTypes.STRING:
-            return [IR(IRType.LOAD_STRING, node.children)]
+            irs = []
+            irs.append(debug_info)
+            irs.append(IR(IRType.LOAD_STRING, node.children))
+            return irs
 
         elif node_type == XLangASTNodeTypes.SEPARATOR:
             irs = []
+            irs.append(debug_info)
             for child in node.children:
                 irs.extend(self.generate(child))
                 if child != node.children[-1]:
                     irs.append(IR(IRType.RESET_STACK))
             return irs
-        elif node_type == XLangASTNodeTypes.NEVERRETURN:
-            raise Exception("Unreachable code")
         elif node_type == XLangASTNodeTypes.NONE:
-            return [IR(IRType.LOAD_NONE)]
+            irs = []
+            irs.append(debug_info)
+            irs.append(IR(IRType.LOAD_NONE))
+            return irs
         elif node_type == XLangASTNodeTypes.BOOLEN:
-            return [IR(IRType.LOAD_BOOL, node.children)]
+            irs = []
+            irs.append(debug_info)
+            irs.append(IR(IRType.LOAD_BOOL, node.children))
+            return irs
         elif node_type == XLangASTNodeTypes.IF:
             if len(node.children) == 2:
                 irs = []
+                irs.append(debug_info)
                 irs.extend(self.generate(node.children[0]))
                 body = self.generate(node.children[1])
                 irs.append(IR(IRType.JUMP_IF_FALSE, len(body) + 1))
@@ -152,6 +191,7 @@ class IRGenerator:
                 return irs
             elif len(node.children) == 3:
                 irs = []
+                irs.append(debug_info)
                 irs.extend(self.generate(node.children[0]))
                 body = self.generate(node.children[1])
                 else_body = self.generate(node.children[2])
@@ -162,6 +202,7 @@ class IRGenerator:
                 return irs
         elif node_type == XLangASTNodeTypes.WHILE:
             irs = []
+            irs.append(debug_info)
             condition = self.generate(node.children[0])
             body = self.generate(node.children[1])
             irs.extend(condition)
@@ -171,6 +212,7 @@ class IRGenerator:
             return irs
         elif node_type == XLangASTNodeTypes.MODIFY:
             irs = []
+            irs.append(debug_info)
             val = self.generate(node.children[1])
             if node.children[0] == 'copy':
                 irs.extend(val)

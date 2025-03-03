@@ -81,9 +81,6 @@ class Int:
     def __neg__(self):
         return Int(-self.value)
 
-    def __hash__(self):
-        return hash(self.value)
-
     def __bool__(self):
         return bool(self.value)
 
@@ -167,9 +164,6 @@ class Float:
     def __neg__(self):
         return Float(-self.value)
 
-    def __hash__(self):
-        return hash(self.value)
-
     def __bool__(self):
         return bool(self.value)
 
@@ -204,7 +198,7 @@ class Bool:
 
     def __eq__(self, other):
         if not isinstance(other, Bool):
-            return False
+            return Bool(False)
         return Bool(self.value == other.value)
 
     def __ne__(self, other):
@@ -304,7 +298,7 @@ class NoneType:
         return self
 
     def assgin(self, value):
-        pass
+        raise ValueError("Cannot assign value to NoneType")
 
     def copy(self):
         return NoneType()
@@ -394,7 +388,7 @@ class Tuple:
 
     def __eq__(self, other):
         if not isinstance(other, Tuple):
-            return False
+            return Bool(False)
         return self.values == other.values
 
     def __ne__(self, other):
@@ -427,7 +421,7 @@ class Tuple:
         return self
 
     def assgin_members(self, tuple):
-        # 先尝试将所有 key-value 对按照 key 进行赋值
+        # 先尝试将所有 named args 对按照 key 进行赋值
         # 剩下的值按照顺序赋值
 
         # 分离 key-value 对和普通值
@@ -436,7 +430,7 @@ class Tuple:
         normal_values = []
 
         for item in tuple.values:
-            if isinstance(item, KeyValue):
+            if isinstance(item, Named):
                 key_values.append(item)
             else:
                 normal_values.append(item)
@@ -446,7 +440,7 @@ class Tuple:
             found = False
             # 在当前元组中查找匹配的键
             for i, value in enumerate(self.values):
-                if isinstance(value, KeyValue) and value.key == kv.key:
+                if isinstance(value, Named) and value.key == kv.key:
                     # 找到匹配的键，进行赋值
                     self.values[i].value = kv.value
                     assgined[i] = True
@@ -463,7 +457,7 @@ class Tuple:
             # 寻找一个非 key-value 的位置进行赋值
             while (
                 normal_index < len(assgined)
-                and isinstance(self.values[normal_index], KeyValue)
+                and isinstance(self.values[normal_index], Named)
                 and assgined[normal_index]
             ):
                 normal_index += 1
@@ -576,3 +570,50 @@ class Ref:
     
     def deref(self):
         return self.value
+
+class Named:
+    def __init__(self, key, value):
+        self.key = key
+        self.value = value
+
+    def __str__(self):
+        return f"{self.key} => {self.value}"
+
+    def __repr__(self):
+        return str(self)
+
+    def copy(self):
+        return Named(self.key, self.value)
+
+    def get_value(self):
+        return self.value.get_value()
+
+    def assgin(self, value):
+        self.value = value
+
+    def check_key(self, key):
+        return self.key.value == key.value
+    
+    def get_member(self, key):
+        return self.value.get_member(key)
+    
+class Variable:
+    # 包装变量，用于在 Context 中存储变量
+    def __init__(self, value):
+        self.value = value
+
+    def __str__(self):
+        return f"Variable({self.value})"
+    
+    def __repr__(self):
+        return str(self)
+    
+    def copy(self):
+        return Variable(self.value.copy())
+    
+    def get_value(self):
+        return self.value.get_value()
+    
+    def assgin(self, value):
+        self.value = value
+    

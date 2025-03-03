@@ -14,9 +14,12 @@ from .variable import (
     GetAttr,
     IndexOf,
     BuiltIn,
+    Variable,
+    Named
 )
 
 import traceback
+import textwrap
 
 
 class IRType(enum.Enum):
@@ -28,6 +31,7 @@ class IRType(enum.Enum):
     LOAD_LAMBDA = auto()  # 加载 lambda 函数到栈
     BUILD_TUPLE = auto()  # 构建元组，参数为元组长度
     BUILD_KEY_VAL = auto()  # 构建键值对
+    BUILD_NAMED = auto()  # 构建命名参数
     BINARAY_OP = auto()  # 二元运算符
     UNARY_OP = auto()  # 一元运算符
     LET_VAL = auto()  # 定义变量，参数为变量名
@@ -51,6 +55,7 @@ class IRType(enum.Enum):
     REF_VAL = auto() # 引用值
     DEREF_VAL = auto() # 取消引用值
     ASSERT = auto() # 断言
+    DEBUG_INFO = auto()  # 调试信息
 
 class IR:
     def __init__(self, ir_type, value=None):
@@ -261,12 +266,45 @@ def create_builtins(context):
     context.let("repr", BuiltIn(repr_func))
 
 class IRExecutor:
-    def __init__(self, functions):
+    def __init__(self, functions, origin_code = None):
         self.stack = []
         self.context = Context()
         self.ip = 0  # 指令指针
         self.instructions, self.func_ips = functions.build_instructions()
+        self.origin_code = origin_code
+        self.debug_info = None
 
+    def print_debug_info(self):
+        code_positon = self.debug_info["code_position"]
+        # 根据代码位置计算行号和列号
+        lines = self.origin_code.split("\n")
+        line = 0
+        column = 0
+        for i, l in enumerate(lines):
+            if code_positon < len(l):
+                line = i
+                column = code_positon
+                break
+            code_positon -= len(l) + 1
+        print(f"# Error at line {line + 1}, column {column + 1}\n")
+
+        # 可视化打印代码错误位置
+
+        print_code = ""
+
+        if line > 1:
+            print_code += lines[line - 1] + "\n"
+        line_code = lines[line]
+        print_code += line_code + "\n"
+        print_code += " " * column + "^" + "\n"
+        if line < len(lines) - 1:
+            print_code += lines[line + 1] + "\n"
+
+        print_code = textwrap.dedent(print_code)
+        print("## Code:\n")
+        print("```")
+        print(print_code)
+        print("```")
     def execute(self, entry="__main__"):
         self.context.new_frame(self.stack)
         create_builtins(self.context)
@@ -280,8 +318,12 @@ class IRExecutor:
                 self.ip += 1
                 # print(f"ip: {self.ip}, ir: {instr}, stack: {self.stack}")
         except Exception as e:
-            print(f"Error: {traceback.format_exc()}")
-            print(f"ip: {self.ip}, ir: {instr}")
+            print(f"# Error: {e}\n")
+            print(f"# ip: {self.ip}, ir: {instr}\n")
+
+            if self.origin_code is not None and self.debug_info is not None:
+                self.print_debug_info()
+
             self.context.print_stack_and_frames(self.stack)
 
         self.context.pop_frame(self.stack)
@@ -357,7 +399,7 @@ class IRExecutor:
 
         elif instr.ir_type == IRType.LET_VAL:
             value = self.stack.pop()
-            self.context.let(instr.value, value.get_value())
+            self.context.let(instr.value, Variable(value.get_value()))
 
         elif instr.ir_type == IRType.GET_VAL:
             self.stack.append(self.context.get(instr.value))
@@ -386,8 +428,8 @@ class IRExecutor:
 
                 # 将默认参数进行let
                 for v in default_args.values:
-                    if not isinstance(v, KeyValue):
-                        raise ValueError(f"Default args must be KeyValue, but got {v}")
+                    if not isinstance(v, Named):
+                        raise ValueError(f"Lambda {func} default args must be Named, but got {v}")
                     self.context.let(v.key.value, v.value)
 
                 if not isinstance(func.self_object, NoneType):
@@ -454,18 +496,20 @@ class IRExecutor:
                 self.stack.append(v.deref())
             else:
                 raise ValueError(f"Can't deref non-ref value: {v}")
-        
+
         elif instr.ir_type == IRType.KEY_OF:
             obj = self.stack.pop().get_value()
-            if not isinstance(obj, KeyValue):
-                raise ValueError(f"Object is not KeyValue: {obj}")
-            self.stack.append(obj.key)
+            if isinstance(obj, KeyValue) or isinstance(obj, Named):
+                self.stack.append(obj.key)
+            else:
+                raise ValueError(f"Object is not KeyValue or Named: {obj}")
 
         elif instr.ir_type == IRType.VALUE_OF:
             obj = self.stack.pop().get_value()
-            if not isinstance(obj, KeyValue):
-                raise ValueError(f"Object is not KeyValue: {obj}")
-            self.stack.append(obj.value)
+            if isinstance(obj, KeyValue) or isinstance(obj, Named):
+                self.stack.append(obj.value)
+            else:
+                raise ValueError(f"Object is not KeyValue or Named: {obj}")
 
         elif instr.ir_type == IRType.ASSERT:
             value = self.stack.pop().get_value()
@@ -473,9 +517,17 @@ class IRExecutor:
                 raise ValueError(f"Assert value is not Bool: {value}")
             if not value.value:
                 raise ValueError(f"Assert failed")
-            
+
         elif instr.ir_type == IRType.SELF_OF:
             value = self.stack.pop().get_value()
             if not isinstance(value, Lambda):
                 raise ValueError(f"Object is not Lambda: {value}")
             self.stack.append(value.self_object)
+
+        elif instr.ir_type == IRType.BUILD_NAMED:
+            value = self.stack.pop()
+            key = self.stack.pop()
+            self.stack.append(Named(key, value))
+
+        elif instr.ir_type == IRType.DEBUG_INFO:
+            self.debug_info = instr.value

@@ -215,12 +215,14 @@ class XLangASTNodeTypes(enum.Enum):
     IF = auto()
     WHILE = auto()
     MODIFY = auto()
+    NAMED_ARGUMENT = auto()
 
 
 class XLangASTNode:
-    def __init__(self, node_type: XLangASTNodeTypes, children):
+    def __init__(self, node_type: XLangASTNodeTypes, children, node_position=None):
         self.node_type = node_type
         self.children = children
+        self.node_position = node_position # 用于记录节点在源代码中的位置
 
     def __str__(self):
         return f"{self.node_type.name} {self.children}"
@@ -304,7 +306,7 @@ class XLangSeparator:
         if not node:
             return None, 0
         return (
-            XLangASTNode(XLangASTNodeTypes.SEPARATOR, separated + [node]),
+            XLangASTNode(XLangASTNodeTypes.SEPARATOR, separated + [node], self.token_list[start_idx][0]['position']),
             last_offset + node_offset,
         )
 
@@ -323,7 +325,12 @@ class XLangReturn:
         guess, offset = node_matcher.match(self.token_list, start_idx + 1)
         if not guess:
             return None, 0
-        return XLangASTNode(XLangASTNodeTypes.RETURN, guess), offset + 1
+        return (
+            XLangASTNode(
+                XLangASTNodeTypes.RETURN, guess, self.token_list[start_idx][0]['position']
+            ),
+            offset + 1,
+        )
 
 
 @node_matcher.register(priority=59)
@@ -360,7 +367,11 @@ class XLangTuple:
         if not node:
             return None, 0
         return (
-            XLangASTNode(XLangASTNodeTypes.TUPLE, separated + [node]),
+            XLangASTNode(
+                XLangASTNodeTypes.TUPLE,
+                separated + [node],
+                self.token_list[start_idx][0]['position'],
+            ),
             last_offset + node_offset,
         )
 
@@ -390,8 +401,17 @@ class XLangLet:
             return None, 0
         if left_offset != len(left):
             raise Exception("Invalid let: Left side can't be fully matched: ", left)
+        if left_node.node_type != XLangASTNodeTypes.VARIABLE and left_node.node_type != XLangASTNodeTypes.STRING:
+            raise Exception("Invalid let: Left side must be a variable or a string: ", left)
         right_node = right_guess
-        return XLangASTNode(XLangASTNodeTypes.LET, [left_node, right_node]), offset + 2
+        return (
+            XLangASTNode(
+                XLangASTNodeTypes.LET,
+                [left_node, right_node],
+                self.token_list[start_idx][0]['position'],
+            ),
+            offset + 2,
+        )
 
 
 @node_matcher.register(priority=30)
@@ -433,8 +453,48 @@ class XLangAssign:
             return None, 0
 
         return (
-            XLangASTNode(XLangASTNodeTypes.ASSIGN, [left_node, right_guess]),
+            XLangASTNode(
+                XLangASTNodeTypes.ASSIGN,
+                [left_node, right_guess],
+                self.token_list[start_idx][0]['position'],
+            ),
             offset + right_offset + 1,  # +1 是因为 = 符号
+        )
+
+
+@node_matcher.register(priority=23)
+class XLangNamedArgument:
+    # 匹配 xxx => xxx
+    def __init__(self, token_list):
+        self.token_list = token_list
+
+    def match(self, start_idx):
+        if start_idx + 2 >= len(self.token_list):
+            return None, 0
+        if not _is_symbol(self.token_list[start_idx + 1], "=>"):
+            return None, 0
+
+        left = Gather(self.token_list[start_idx]).gather()
+
+        right_guess, offset = node_matcher.match(self.token_list, start_idx + 2)
+
+        left_node, left_offset = node_matcher.match(left, 0)
+        if not left_node:
+            return None, 0
+        if left_offset != len(left):
+            raise Exception(
+                "Invalid named argument: Left side can't be fully matched: ", left
+            )
+        if left_node.node_type == XLangASTNodeTypes.VARIABLE:
+            left_node.node_type = XLangASTNodeTypes.STRING # 将变量名转换为字符串
+        right_node = right_guess
+        return (
+            XLangASTNode(
+                XLangASTNodeTypes.NAMED_ARGUMENT,
+                [left_node, right_node],
+                self.token_list[start_idx][0]['position'],
+            ),
+            offset + 2,
         )
 
 
@@ -463,7 +523,11 @@ class XLangKeyVal:
             )
         right_node = right_guess
         return (
-            XLangASTNode(XLangASTNodeTypes.KEY_VAL, [left_node, right_node]),
+            XLangASTNode(
+                XLangASTNodeTypes.KEY_VAL,
+                [left_node, right_node],
+                self.token_list[start_idx][0]["position"],
+            ),
             offset + 2,
         )
 
@@ -488,9 +552,15 @@ class XLangWhile:
         body_guess, offset = node_matcher.match(self.token_list, start_idx + 2)
         if not body_guess:
             return None, 0
-        
 
-        return XLangASTNode(XLangASTNodeTypes.WHILE, [condition, body_guess]), offset + 2
+        return (
+            XLangASTNode(
+                XLangASTNodeTypes.WHILE,
+                [condition, body_guess],
+                self.token_list[start_idx][0]["position"],
+            ),
+            offset + 2,
+        )
 
 
 @node_matcher.register(priority=20)
@@ -518,9 +588,23 @@ class XLangIF:
             false_node, false_offset = node_matcher.match(self.token_list, start_idx + 4)
             if not false_node:
                 return None, 0
-            return XLangASTNode(XLangASTNodeTypes.IF, [condition, true_condition, false_node]), 4 + false_offset
+            return (
+                XLangASTNode(
+                    XLangASTNodeTypes.IF,
+                    [condition, true_condition, false_node],
+                    self.token_list[start_idx][0]['position'],
+                ),
+                4 + false_offset,
+            )
 
-        return XLangASTNode(XLangASTNodeTypes.IF, [condition, true_condition]), 3
+        return (
+            XLangASTNode(
+                XLangASTNodeTypes.IF,
+                [condition, true_condition],
+                self.token_list[start_idx][0]['position'],
+            ),
+            3,
+        )
 
 
 @node_matcher.register(priority=12)
@@ -722,7 +806,11 @@ class XLangOperatorLevel1:
                 return None, 0
 
             return (
-                XLangASTNode(XLangASTNodeTypes.OPERATION, [operation, right_node]),
+                XLangASTNode(
+                    XLangASTNodeTypes.OPERATION,
+                    [operation, right_node],
+                    self.token_list[start_idx][0]['position'],
+                ),
                 len(self.token_list) - start_idx,
             )
 
@@ -821,10 +909,17 @@ class XLangFunctionDef:
             return None, 0
         right_node = XLangASTParser(
             Gather(_unwrap_body(self.token_list[start_idx + 2])).gather()
-        ).parse_body()
+        ).parse_body(start_idx=0)
         if not right_node:
             return None, 0
-        return XLangASTNode(XLangASTNodeTypes.FUNCTION_DEF, [left_node, right_node]), 3
+        return (
+            XLangASTNode(
+                XLangASTNodeTypes.FUNCTION_DEF,
+                [left_node, right_node],
+                self.token_list[start_idx][0]['position'],
+            ),
+            3,
+        )
 
 
 @node_matcher.register(priority=3)
@@ -904,7 +999,11 @@ class XLangMemberAccess:
                 return None, 0
 
             return (
-                XLangASTNode(XLangASTNodeTypes.INDEX_OF, [left_node, index_node]),
+                XLangASTNode(
+                    XLangASTNodeTypes.INDEX_OF,
+                    [left_node, index_node],
+                    self.token_list[start_idx][0]['position'],
+                ),
                 access_pos - start_idx + 1,
             )
 
@@ -915,12 +1014,22 @@ class XLangMemberAccess:
 
             if not args_node:
                 # 处理空参数情况
-                args_node = XLangASTNode(XLangASTNodeTypes.TUPLE, [])
+                args_node = XLangASTNode(
+                    XLangASTNodeTypes.TUPLE, [], self.token_list[start_idx][0]['position']
+                )
             elif args_node.node_type != XLangASTNodeTypes.TUPLE:
-                args_node = XLangASTNode(XLangASTNodeTypes.TUPLE, [args_node])
+                args_node = XLangASTNode(
+                    XLangASTNodeTypes.TUPLE,
+                    [args_node],
+                    self.token_list[start_idx][0]['position'],
+                )
 
             return (
-                XLangASTNode(XLangASTNodeTypes.FUNCTION_CALL, [left_node, args_node]),
+                XLangASTNode(
+                    XLangASTNodeTypes.FUNCTION_CALL,
+                    [left_node, args_node],
+                    self.token_list[start_idx][0]['position'],
+                ),
                 access_pos - start_idx + 1,
             )
 
@@ -933,14 +1042,19 @@ class XLangMemberAccess:
             right_node, right_offset = node_matcher.match(right_token, 0)
             if not right_node:
                 return None, 0
-            
+
             if right_node.node_type == XLangASTNodeTypes.VARIABLE:
-                attr_name = XLangASTNode(XLangASTNodeTypes.STRING, right_node.children)
+                attr_name = XLangASTNode(
+                    XLangASTNodeTypes.STRING,
+                    right_node.children,
+                    self.token_list[start_idx][0]['position'],
+                )
 
             return (
                 XLangASTNode(
                     XLangASTNodeTypes.GET_ATTR,
                     [left_node, attr_name],
+                    self.token_list[start_idx][0]['position']
                 ),
                 access_pos - start_idx + 1 + right_offset,
             )
@@ -956,7 +1070,12 @@ class XLangVariable:
         if _is_tuple(self.token_list[start_idx]):
             unwarped = _unwrap_tuple(self.token_list[start_idx])
             if len(unwarped) == 0:
-                return XLangASTNode(XLangASTNodeTypes.TUPLE, []), 1
+                return (
+                    XLangASTNode(
+                        XLangASTNodeTypes.TUPLE, [], self.token_list[start_idx][0]['position']
+                    ),
+                    1,
+                )
             node, offset = node_matcher.match(
                 Gather(unwarped).gather(), 0
             )
@@ -967,33 +1086,57 @@ class XLangVariable:
             return (
                 XLangASTNode(
                     XLangASTNodeTypes.BODY,
-                    XLangASTParser(Gather(_unwrap_body(self.token_list[start_idx])).gather()).parse(),
+                    XLangASTParser(
+                        Gather(_unwrap_body(self.token_list[start_idx])).gather()
+                    ).parse(),
+                    self.token_list[start_idx][0]['position'],
                 ),
                 1,
             )
         if _is_string(self.token_list[start_idx]):
             return (
                 XLangASTNode(
-                    XLangASTNodeTypes.STRING, _concat(self.token_list[start_idx])
+                    XLangASTNodeTypes.STRING,
+                    _concat(self.token_list[start_idx]),
+                    self.token_list[start_idx][0]["position"],
                 ),
                 1,
             )
         if _is_number(self.token_list[start_idx]):
             return (
                 XLangASTNode(
-                    XLangASTNodeTypes.NUMBER, _concat(self.token_list[start_idx])
+                    XLangASTNodeTypes.NUMBER,
+                    _concat(self.token_list[start_idx]),
+                    self.token_list[start_idx][0]['position'],
                 ),
                 1,
             )
         if _is_identifier(self.token_list[start_idx], "true"):
-            return XLangASTNode(XLangASTNodeTypes.BOOLEN, True), 1
+            return (
+                XLangASTNode(
+                    XLangASTNodeTypes.BOOLEN, True, self.token_list[start_idx][0]['position']
+                ),
+                1,
+            )
         if _is_identifier(self.token_list[start_idx], "false"):
-            return XLangASTNode(XLangASTNodeTypes.BOOLEN, False), 1
+            return (
+                XLangASTNode(
+                    XLangASTNodeTypes.BOOLEN, False, self.token_list[start_idx][0]['position']
+                ),
+                1,
+            )
         if _is_identifier(self.token_list[start_idx], "null"):
-            return XLangASTNode(XLangASTNodeTypes.NONE, None), 1
+            return (
+                XLangASTNode(
+                    XLangASTNodeTypes.NONE, None, self.token_list[start_idx][0]['position']
+                ),
+                1,
+            )
         return (
             XLangASTNode(
-                XLangASTNodeTypes.VARIABLE, _concat(self.token_list[start_idx])
+                XLangASTNodeTypes.VARIABLE,
+                _concat(self.token_list[start_idx]),
+                self.token_list[start_idx][0]['position'],
             ),
             1,
         )
@@ -1015,5 +1158,7 @@ class XLangASTParser:
                 self.offset += 1
         return ret
 
-    def parse_body(self):
-        return XLangASTNode(XLangASTNodeTypes.BODY, self.parse())
+    def parse_body(self, start_idx = 0) -> XLangASTNode:
+        return XLangASTNode(
+            XLangASTNodeTypes.BODY, self.parse(), self.token_list[start_idx][0]['position']
+        )
