@@ -181,6 +181,18 @@ class IRGenerator:
             elif node.children[0] == 'deref':
                 irs.extend(val)
                 irs.append(IR(IRType.DEREF_VAL))
+            elif node.children[0] == 'keyof':
+                irs.extend(val)
+                irs.append(IR(IRType.KEY_OF))
+            elif node.children[0] == 'valueof':
+                irs.extend(val)
+                irs.append(IR(IRType.VALUE_OF))
+            elif node.children[0] == 'assert':
+                irs.extend(val)
+                irs.append(IR(IRType.ASSERT))
+            elif node.children[0] == 'selfof':
+                irs.extend(val)
+                irs.append(IR(IRType.SELF_OF))
             else:
                 raise ValueError(f"Unknown modifier: {node.children[0]}")
             return irs

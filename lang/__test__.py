@@ -210,18 +210,28 @@ print(lambda());
     """
 
     code = """
-    A := 1;
-    B := ref A;
-    C := deref B;
-    print(repr(B), repr(C));
-
-    step := ('value': 0) -> {
-        deref value = deref value + 1;
+    classA := ('v': 0) -> {
+        return 'A': (
+            'member': v,
+            'add': ('value': null) -> {
+                //assert (type(value) == "KeyVal");
+                // assert (keyof value == "A");
+                //self.member = value.member;
+                print(self.member, value.member);
+            },
+        );
     };
 
-    step(ref A);
-    print(repr(A));
+    objectA := classA(1);
+    //print(objectA.method());
+    //assert(keyof objectA == "A");
+    //print(repr(valueof((valueof objectA)[1])));
+    //print(repr(selfof objectA.method));
+    //print(type(objectA));
 
+    objectB := classA(2);
+    //objectB.member = 2;
+    objectA.add(objectB);
     """
 
 

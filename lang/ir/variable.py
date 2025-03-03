@@ -252,28 +252,25 @@ class String:
 
     def __eq__(self, other):
         if not isinstance(other, String):
-            return False
+            return Bool(False)
         return Bool(self.value == other.value)
 
     def __ne__(self, other):
         return Bool(self.value != other.value)
 
     def __len__(self):
-        return len(self.value)
+        return Int(len(self.value))
 
     def __getitem__(self, index):
         return String(self.value[index])
 
     def __contains__(self, item):
         if isinstance(item, String):
-            return item.value in self.value
-        return item in self.value
+            return Bool(item.value in self.value)
+        return Bool(item in self.value)
 
     def __bool__(self):
-        return bool(self.value)
-
-    def __hash__(self):
-        return hash(self.value)
+        return Bool(self.value)
 
     def assgin(self, value):
         self.value = value.value
@@ -295,13 +292,13 @@ class NoneType:
         return str(self)
 
     def __bool__(self):
-        return False
+        return Bool(False)
 
     def __eq__(self, other):
-        return isinstance(other, NoneType)
-
+        return Bool(isinstance(other, NoneType))
+    
     def __ne__(self, other):
-        return not self.__eq__(other)
+        return Bool(not isinstance(other, NoneType))
 
     def get_value(self):
         return self
@@ -337,17 +334,18 @@ class KeyValue:
 
     def get_value(self):
         return self
-
+    def get_member(self, key):
+        return self.value.get_member(key)
 
 class Lambda:
     def __init__(self, captured_val, default_args_tuple, signature):
         self.captured_val = captured_val
         self.signature = signature
         self.default_args_tuple = default_args_tuple
-        self.caller = None  # obj.xxx() 中的 obj
+        self.self_object = NoneType()
 
     def __str__(self):
-        return f"Lambda({self.captured_val}, {self.signature})"
+        return f"Lambda({self.signature}, default_args = {self.default_args_tuple}, self = {self.self_object})"
 
     def __repr__(self):
         return str(self)
@@ -371,7 +369,7 @@ class Tuple:
         self.values = values
         for value in values:
             if isinstance(value, KeyValue) and isinstance(value.value, Lambda):
-                value.value.caller = self  # 传递调用者，以便在 Lambda 中访问 Tuple 的值
+                value.value.self_object = self  # 传递调用者，以便在 Lambda 中访问 Tuple 的值
 
     def __str__(self):
         return f"Tuple({self.values})"
@@ -457,7 +455,7 @@ class Tuple:
 
             if not found:
                 # 如果没有找到匹配的键，添加新的键值对
-                self.values.append(kv.copy())
+                self.values.append(kv)
 
         # 按顺序处理剩下的普通值
         normal_index = 0
@@ -481,7 +479,7 @@ class Tuple:
                 normal_index += 1
             else:
                 # 没有更多位置，追加到末尾
-                self.values.append(value.copy() if hasattr(value, "copy") else value)
+                self.values.append(value)
 
 
 class GetAttr:
