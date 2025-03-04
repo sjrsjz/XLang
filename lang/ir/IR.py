@@ -78,9 +78,6 @@ class Functions:
     def add(self, name, func):
         self.function_instructions[name] = func
 
-    def get(self, name):
-        return self.function_instructions[name]
-
     def build_instructions(self):
         func_ips = {}
         instructions = []
@@ -296,7 +293,7 @@ class IRExecutor:
             print_code += lines[line - 1] + "\n"
         line_code = lines[line]
         print_code += line_code + "\n"
-        print_code += " " * column + "^" + "\n"
+        print_code += "-" * column + "^" + "\n"
         if line < len(lines) - 1:
             print_code += lines[line + 1] + "\n"
 
@@ -346,7 +343,7 @@ class IRExecutor:
 
         elif instr.ir_type == IRType.LOAD_LAMBDA:
             default_args = self.stack.pop().object_ref()  # 获取默认参数，这里是一个tuple
-            self.stack.append(Lambda(None, default_args, instr.value))
+            self.stack.append(Lambda(instr.value[1], default_args, instr.value[0]))
 
         elif instr.ir_type == IRType.BUILD_TUPLE:
             count = instr.value

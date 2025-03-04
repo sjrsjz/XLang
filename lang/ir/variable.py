@@ -336,27 +336,27 @@ class KeyValue:
         return self.value.object_ref().get_member(key)
 
 class Lambda:
-    def __init__(self, captured_val, default_args_tuple, signature):
-        self.captured_val = captured_val
+    def __init__(self, code_position, default_args_tuple, signature):
+        self.code_position = code_position
         self.signature = signature
         self.default_args_tuple = default_args_tuple
         self.self_object = NoneType()
 
     def __str__(self):
-        return f"Lambda({self.signature}, default_args = {self.default_args_tuple}, self = {self.self_object})"
+        return f"Lambda({self.signature}, default_args = {self.default_args_tuple}, self = {self.self_object}, code_position = {self.code_position})"
 
     def __repr__(self):
         return str(self)
 
     def assgin(self, o):
-        self.captured_val = o.captured_val
+        self.code_position = o.captured_val
         self.signature = o.signature
 
     def object_ref(self):
         return self
 
     def copy(self):
-        return Lambda(self.captured_val, self.default_args_tuple.copy(), self.signature)
+        return Lambda(self.code_position, self.default_args_tuple.copy(), self.signature)
 
 
 class Tuple:

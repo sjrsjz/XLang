@@ -54,7 +54,7 @@ class IRGenerator:
             self.functions.add(signture, body_ir)
 
             irs.extend(args_ir)  # 构建默认参数的tuple
-            irs.append(IR(IRType.LOAD_LAMBDA, signture))
+            irs.append(IR(IRType.LOAD_LAMBDA, [signture, node.node_position]))
             return irs
 
         elif node_type == XLangASTNodeTypes.ASSIGN:
