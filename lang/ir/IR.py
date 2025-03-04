@@ -20,6 +20,7 @@ from .variable import (
 
 import traceback
 import textwrap
+import asyncio
 
 
 class IRType(enum.Enum):
@@ -98,6 +99,21 @@ class Functions:
     def __repr__(self):
         return str(self)
 
+    def export_to_json(self):
+        json_data = {}
+        for name, instructions in self.function_instructions.items():
+            json_data[name] = []
+            for instr in instructions:
+                json_data[name].append({instr.ir_type.name : instr.value})
+        return json_data
+
+    def import_from_json(self, json_data):
+        self.function_instructions = {}
+        for name, instructions in json_data.items():
+            self.function_instructions[name] = []
+            for instr in instructions:
+                for ir_type, value in instr.items():
+                    self.function_instructions[name].append(IR(IRType[ir_type], value))
 
 def create_builtins(context):
     def print_func(args):
@@ -271,18 +287,29 @@ class IRExecutor:
         self.origin_code = origin_code
         self.debug_info = None
 
-    def print_debug_info(self):
-        code_positon = self.debug_info["code_position"]
-        # 根据代码位置计算行号和列号
+
+    def calculate_line_column(self, code_position):
         lines = self.origin_code.split("\n")
         line = 0
         column = 0
-        for i, l in enumerate(lines):
-            if code_positon < len(l):
+        remaining_position = code_position
+        
+        for i, line_text in enumerate(lines):
+            if remaining_position <= len(line_text):
                 line = i
-                column = code_positon
+                column = remaining_position
                 break
-            code_positon -= len(l) + 1
+            remaining_position -= len(line_text) + 1
+        
+        return line, column
+
+    def print_debug_info(self):
+        code_positon = self.debug_info["code_position"]
+
+        line, column = self.calculate_line_column(code_positon)
+        lines = self.origin_code.split("\n")        
+
+
         print(f"# Error at line {line + 1}, column {column + 1}\n")
 
         # 可视化打印代码错误位置
@@ -303,7 +330,7 @@ class IRExecutor:
         print(print_code)
         print("```")
     def execute(self, entry="__main__"):
-        self.context.new_frame(self.stack)
+        self.context.new_frame(self.stack, enter_func=True, funciton_code_position=0)
         create_builtins(self.context)
 
         self.ip = self.func_ips[entry]
@@ -313,7 +340,39 @@ class IRExecutor:
                 instr = self.instructions[self.ip]
                 self.execute_instruction(instr)
                 self.ip += 1
-                # print(f"ip: {self.ip}, ir: {instr}, stack: {self.stack}")
+        except Exception as e:
+            print(f"# Error: {e}\n")
+            print(f"# ip: {self.ip}, ir: {instr}\n")
+
+            if self.origin_code is not None and self.debug_info is not None:
+                self.print_debug_info()
+
+            error, code_positions = self.context.format_stack_and_frames(self.stack)
+            print(f"# Error: {error}\n")
+            # 根据code_positions打印代码执行位置
+            for code_position in code_positions:
+                line, column = self.calculate_line_column(code_position)
+                print(f"#  line {line + 1}, column {column + 1}\n")
+
+        self.context.pop_frame(self.stack, exit_func=True)
+
+    async def async_execute(self, entry="__main__"):
+        self.context.new_frame(self.stack)
+        create_builtins(self.context)
+
+        self.ip = self.func_ips[entry]
+
+        step_counter = 0
+
+        try:
+            while self.ip < len(self.instructions):
+                instr = self.instructions[self.ip]
+                self.execute_instruction(instr)
+                self.ip += 1
+                step_counter += 1
+                if step_counter > 1000:
+                    step_counter = 0
+                    await asyncio.sleep(0)
         except Exception as e:
             print(f"# Error: {e}\n")
             print(f"# ip: {self.ip}, ir: {instr}\n")
@@ -324,6 +383,7 @@ class IRExecutor:
             self.context.print_stack_and_frames(self.stack)
 
         self.context.pop_frame(self.stack)
+
 
     def execute_instruction(self, instr):
         if instr.ir_type == IRType.LOAD_INT:
@@ -420,7 +480,7 @@ class IRExecutor:
             elif isinstance(func, Lambda):
                 self.stack.append(self.ip)  # 保存当前ip
                 # 建立参数帧
-                self.context.new_frame(self.stack, enter_func=True)
+                self.context.new_frame(self.stack, enter_func=True, funciton_code_position = func.code_position)
                 # 获取函数
                 signature = func.signature  # 获取函数签名
                 default_args = func.default_args_tuple  # 获取默认参数

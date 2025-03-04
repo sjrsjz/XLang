@@ -6,8 +6,8 @@ class Context:
         self.frames = []
         self.stack_pointers = []
 
-    def new_frame(self, stack, enter_func = False):
-        self.frames.append(({}, enter_func))
+    def new_frame(self, stack, enter_func = False, funciton_code_position = None):
+        self.frames.append(({}, enter_func, funciton_code_position))
         self.stack_pointers.append(len(stack))
 
     def pop_frame(self, stack, exit_func = False):
@@ -58,43 +58,62 @@ class Context:
         return str(self)
 
     def __del__(self):
-        #if len(self.frames) > 0:
+        # if len(self.frames) > 0:
         #    raise Exception("Context not clean: frames not empty\n" + str(self.frames))
         del self.frames
 
-    def print_stack_and_frames(self, stack):
-        print("\n# Stack and Frames")
-        
-        # 打印堆栈元素
-        print("\n## Stack:")
+
+    def format_stack_and_frames(self, stack):
+        """返回格式化的堆栈和帧信息，而非打印"""
+        result = []
+        collected_code_positions = []
+        result.append("# Stack and Frames")
+
+        # 格式化堆栈元素
+        result.append("\n## Stack:")
         if not stack:
-            print("  - <Empty>")
+            result.append("  - <Empty>")
         else:
             for i, item in enumerate(stack):
-                print(f"  - <{i}> {type(item).__name__}: `{item}`")
-        
-        # 打印栈指针
-        print("\n## Stack Pointers:")
+                result.append(f"  - <{i}> {type(item).__name__}: `{item}`")
+
+        # 格式化栈指针
+        result.append("\n## Stack Pointers:")
         if not self.stack_pointers:
-            print("  - <Empty>")
+            result.append("  - <Empty>")
         else:
             for i, pointer in enumerate(self.stack_pointers):
-                print(f"  + Frame {i} -> {pointer}")
-        
-        # 打印变量帧
-        print("\n## Frames")
+                result.append(f"  + Frame {i} -> {pointer}")
+
+        # 格式化变量帧
+        result.append("\n## Frames")
         if not self.frames:
-            print("  - <Empty>")
+            result.append("  - <Empty>")
         else:
-            for i, (frame, is_func) in enumerate(self.frames):
-                frame_type = "function" if is_func else "normal"
-                print(f"  + frame {i} ({frame_type}):")
+            for i, (frame, is_func, code_position) in enumerate(self.frames):
+                if is_func:
+                    collected_code_positions.append(code_position)
+                frame_type = (
+                    f"function, code_position = {code_position}" if is_func else "normal"
+                )
+                result.append(f"  + frame {i} ({frame_type}):")
                 if not frame:
-                    print("    - <Empty>")
+                    result.append("    - <Empty>")
                 else:
                     for var_name, var_value in frame.items():
                         value_type = type(var_value).__name__
                         value_repr = str(var_value)
                         if len(value_repr) > 70:  # 截断过长的输出
                             value_repr = value_repr[:67] + "..."
-                        print(f"    - {var_name} = `{value_repr}`")
+                        result.append(f"    - {var_name} = `{value_repr}`")
+
+        return "\n".join(result), collected_code_positions
+
+
+    def print_stack_and_frames(self, stack):
+        """保留向后兼容的打印方法"""
+        error, code_positions = self.format_stack_and_frames(stack)
+        print(error)
+        print("\n# Executed Lambda Positions")
+        for code_position in code_positions:
+            print(f"  - {code_position}")
