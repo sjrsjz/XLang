@@ -96,24 +96,6 @@ def _unwrap_tuple(token_list):
     return token_list[1:-1]
 
 
-def _is_sharp(token_list):
-    if len(token_list) != 1:
-        return False
-    return (
-        token_list[0]["token"] == "#"
-        and token_list[0]["type"] == XLangTokenType.TokenType_SYMBOL
-    )
-
-
-def _is_exclamation(token_list):
-    if len(token_list) != 1:
-        return False
-    return (
-        token_list[0]["token"] == "!"
-        and token_list[0]["type"] == XLangTokenType.TokenType_SYMBOL
-    )
-
-
 def _is_let(token_list):
     if len(token_list) != 1:
         return False

@@ -348,11 +348,18 @@ class IRExecutor:
                 self.print_debug_info()
 
             error, code_positions = self.context.format_stack_and_frames(self.stack)
-            print(f"# Error: {error}\n")
+            print(error)
+            print("\n# Traceback (most recent call last):")
             # 根据code_positions打印代码执行位置
+            lines = self.origin_code.split("\n")
             for code_position in code_positions:
                 line, column = self.calculate_line_column(code_position)
-                print(f"#  line {line + 1}, column {column + 1}\n")
+                print(f"## line {line + 1}, column {column + 1}")
+                print_code = ""
+                print_code += lines[line] + "\n"
+                print_code += "-" * column + "^" + "\n"
+                print(print_code)
+
 
         self.context.pop_frame(self.stack, exit_func=True)
 

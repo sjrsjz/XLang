@@ -101,7 +101,6 @@ class Context:
                     result.append("    - <Empty>")
                 else:
                     for var_name, var_value in frame.items():
-                        value_type = type(var_value).__name__
                         value_repr = str(var_value)
                         if len(value_repr) > 70:  # 截断过长的输出
                             value_repr = value_repr[:67] + "..."

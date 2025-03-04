@@ -10,7 +10,7 @@ X Lang 是一种轻量级、动态类型的脚本语言，结合了函数式和�
 
 - 变量类型是动态的，不需要显式声明变量类型
 - 变量可以是任意类型
-- 变量有 INT、FLOAT、BOOL、STRING、NoneType、TUPLE、KEYVALUE、Lambda、BUILTIN 类型
+- 变量有 INT、FLOAT、BOOL、STRING、NoneType、TUPLE、KEYVALUE、Lambda、BUILTIN、NAMED 类型
 
 注意：
 
@@ -82,7 +82,7 @@ if (operator == "+") { // else if组合式语法
 ### 简单函数
 
 ```
-add := ('a': 0, 'b': 0) -> {
+add := (a => 0, b => 0) -> {
     return a + b;
 };
 print(add(5, 3));  // 输出: 8
@@ -93,7 +93,7 @@ print(add(5, 3));  // 输出: 8
 ```
 person := (
     'name': 'Alice',
-    'greet': ('message': 'Hello') -> {
+    'greet': (message => 'Hello') -> {
         return message + ", " + self.name + "!";
     }
 );
@@ -110,7 +110,7 @@ method := person.greet 是一个极其重要的特性，它允许我们将对象
 ```
 createCounter := () -> {
     count := 0;
-    return ('count': count) -> { // 返回闭包
+    return (count => count) -> { // 返回闭包
         count = count + 1;
         return count;
     };
@@ -129,4 +129,29 @@ print(counter());  // 输出: 2
 a := 1;
 b := ref a;
 print(deref b);  // 输出: 1
+```
+
+### 函数式
+```
+// Z组合子的实现
+// Z组合子允许我们创建匿名递归函数，不需要提前命名函数
+
+Z := (f => (x => null) -> { return x(x); }) -> {
+    return f((x => null, f => f) -> {
+        return f(Z(f))(x,y);
+    });
+};
+
+// 使用Z组合子实现阶乘函数
+factorial := Z((f => null) -> {
+    return (n => 0, f => f) -> {
+        if (n <= 1) {
+            return 1;
+        } else {
+            return n * f(n - 1);
+        };
+    };
+});
+
+print(factorial(5));
 ```
