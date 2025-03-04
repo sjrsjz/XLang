@@ -385,6 +385,10 @@ class IRExecutor:
                 self.stack.append(left > right)
             elif op == ">=":
                 self.stack.append(left >= right)
+            elif op == "%":
+                self.stack.append(left % right)
+            else:
+                raise ValueError(f"Unknown binary operator: {op}")
 
         elif instr.ir_type == IRType.UNARY_OP:
             value = self.stack.pop().object_ref()

@@ -1,17 +1,3 @@
-import enum
-import dis
-
-
-class ValueTypes(enum.Enum):
-    INT = 1
-    FLOAT = 2
-    BOOL = 3
-    STRING = 4
-    TUPLE = 5
-    LAMBDA = 6
-    KEY_VALUE = 7
-
-
 class Int:
     def __init__(self, value):
         self.value = int(value)
@@ -49,6 +35,16 @@ class Int:
     def __truediv__(self, other):
         if isinstance(other, (Int, Float)):
             return Float(self.value / other.value)
+        return NoneType()
+    
+    def __floordiv__(self, other):
+        if isinstance(other, Int):
+            return Int(self.value // other.value)
+        return NoneType()
+    
+    def __mod__(self, other):
+        if isinstance(other, Int):
+            return Int(self.value % other.value)
         return NoneType()
 
     def __eq__(self, other):
@@ -116,22 +112,32 @@ class Float:
     def __add__(self, other):
         if isinstance(other, (Float, Int)):
             return Float(self.value + other.value)
-        return NotImplemented
+        return NoneType()
 
     def __sub__(self, other):
         if isinstance(other, (Float, Int)):
             return Float(self.value - other.value)
-        return NotImplemented
+        return NoneType()
 
     def __mul__(self, other):
         if isinstance(other, (Float, Int)):
             return Float(self.value * other.value)
-        return NotImplemented
+        return NoneType()
 
     def __truediv__(self, other):
         if isinstance(other, (Float, Int)):
             return Float(self.value / other.value)
-        return NotImplemented
+        return NoneType()
+    
+    def __floordiv__(self, other):
+        if isinstance(other, (Float, Int)):
+            return Float(self.value // other.value)
+        return NoneType()
+    
+    def __mod__(self, other):
+        if isinstance(other, (Float, Int)):
+            return Float(self.value % other.value)
+        return NoneType()
 
     def __eq__(self, other):
         if not isinstance(other, (Float, Int)):
@@ -144,22 +150,22 @@ class Float:
     def __lt__(self, other):
         if isinstance(other, (Float, Int)):
             return Bool(self.value < other.value)
-        return NotImplemented
+        return NoneType()
 
     def __le__(self, other):
         if isinstance(other, (Float, Int)):
             return Bool(self.value <= other.value)
-        return NotImplemented
+        return NoneType()
 
     def __gt__(self, other):
         if isinstance(other, (Float, Int)):
             return Bool(self.value > other.value)
-        return NotImplemented
+        return NoneType()
 
     def __ge__(self, other):
         if isinstance(other, (Float, Int)):
             return Bool(self.value >= other.value)
-        return NotImplemented
+        return NoneType()
     
     def __neg__(self):
         return Float(-self.value)
@@ -242,7 +248,7 @@ class String:
     def __add__(self, other):
         if isinstance(other, String):
             return String(self.value + other.value)
-        return NotImplemented
+        return NoneType()
 
     def __eq__(self, other):
         if not isinstance(other, String):

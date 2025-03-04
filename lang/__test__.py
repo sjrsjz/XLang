@@ -495,6 +495,176 @@ employeeTable.display();
 
 """
 
+    code = r"""
+// 简易神经网络实现 - 单层感知器
+// 可用于简单的二分类问题
+
+random := (seed => 0) -> {
+    seed = (seed * 9301 + 49297) % 233280;
+    return seed / 233280.0;
+};
+
+createPerceptron := (inputSize => 2, learningRate => 0.1) -> {
+    // 初始化权重和偏置
+    initializeWeights := (inputSize => inputSize) -> {
+        weights := ();
+        i := 0;
+        while (i < inputSize) {
+            // 随机初始化权重为-1到1之间的值
+            weights = weights + (random(copy i) * 2 - 1,);
+            i = i + 1;
+        };
+        print("初始化权重:", repr(weights));
+        return weights;
+    };
+    
+    // 激活函数 - ReLU
+    activate := (sum => 0.0) -> {
+        if (sum > 0) {
+            return sum;
+        } else {
+            return 0;
+        };
+    };
+    
+    return (
+        'weights': initializeWeights(),
+        'bias': random() * 2 - 1, // 偏置项
+        
+        // 预测函数
+        'predict': (inputs => (), inputSize => inputSize, activate => activate) -> {
+            if (len(inputs) != inputSize) {
+                print("错误: 输入维度不匹配");
+                return null;
+            };
+            
+            // 计算加权和
+            sum := self.bias;
+            i := 0;
+            while (i < inputSize) {
+                sum = sum + inputs[i] * self.weights[i];
+                i = i + 1;
+            };
+            
+            // 应用激活函数
+            return activate(sum);
+        },
+        
+        // 训练函数
+        'train': (trainingData => (), epochs => 100, inputSize => inputSize, learningRate => learningRate) -> {
+            epoch := 0;
+            while (epoch < epochs) {
+                totalError := 0;
+                
+                // 遍历训练数据
+                i := 0;
+                while (i < len(trainingData)) {
+                    sample := trainingData[i];
+                    inputs := sample[0];
+                    target := sample[1];
+                    
+                    // 预测
+                    prediction := self.predict(inputs);
+                    
+                    // 计算误差
+                    error := target - prediction;
+                    totalError = totalError + (if (error < 0) (-error) else (error));
+                    
+                    // 更新权重
+                    j := 0;
+                    while (j < inputSize) {
+                        self.weights[j] = self.weights[j] + learningRate * error * inputs[j];
+                        j = j + 1;
+                    };
+                    
+                    // 更新偏置
+                    self.bias = self.bias + learningRate * error;
+                    
+                    i = i + 1;
+                };
+                
+                // 打印当前轮次和误差
+                if (epoch % 10 == 0) {
+                    print("轮次", epoch, "总误差:", totalError);
+                };
+                
+                epoch = epoch + 1;
+            };
+            
+            print("训练完成!");
+            print("最终权重:", repr(self.weights));
+            print("最终偏置:", repr(self.bias));
+        }
+    );
+};
+
+// 创建逻辑AND门的训练数据
+andData := (
+    ((0, 0), 0),
+    ((0, 1), 0),
+    ((1, 0), 0),
+    ((1, 1), 1)
+);
+
+// 创建逻辑OR门的训练数据
+orData := (
+    ((0.0, 0.0), 0.0),
+    ((0.0, 1.0), 1.0),
+    ((1.0, 0.0), 1.0),
+    ((1.0, 1.0), 1.0)
+);
+
+// 创建感知器并训练AND门
+print("训练AND门感知器:");
+andPerceptron := createPerceptron(2, 0.1);
+andPerceptron.train(andData, 1000);
+
+// 测试AND门
+print("\n测试AND门:");
+print("0 AND 0 =", andPerceptron.predict((0, 0),));
+print("0 AND 1 =", andPerceptron.predict((0, 1),));
+print("1 AND 0 =", andPerceptron.predict((1, 0),));
+print("1 AND 1 =", andPerceptron.predict((1, 1),));
+
+// 创建感知器并训练OR门
+print("\n训练OR门感知器:");
+orPerceptron := createPerceptron(2, 0.1);
+orPerceptron.train(orData, 1000);
+
+// 测试OR门
+print("\n测试OR门:");
+print("0 OR 0 =", orPerceptron.predict((0.0, 0.0),));
+print("0 OR 1 =", orPerceptron.predict((0.0, 1.0),));
+print("1 OR 0 =", orPerceptron.predict((1.0, 0.0),));
+print("1 OR 1 =", orPerceptron.predict((1.0, 1.0),));
+
+"""
+
+    code = """
+// Z组合子的实现
+// Z组合子允许我们创建匿名递归函数，不需要提前命名函数
+
+Z := (f => (x => null) -> { return x(x); }) -> {
+    return f((x => null, f => f) -> {
+        return f(Z(f))(x);
+    });
+};
+
+// 使用Z组合子实现阶乘函数
+factorial := Z((f => null) -> {
+    return (n => 0, f => f) -> {
+        if (n <= 1) {
+            return 1;
+        } else {
+            return n * f(n - 1);
+        };
+    };
+});
+
+print(factorial(5));
+
+"""
+
     ast = build_ast(code)
     functions = Functions()
     # print(ast)
