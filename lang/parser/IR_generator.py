@@ -5,7 +5,7 @@ from typing import List
 
 class IRGenerator:
 
-    def __init__(self, functions, namespace="Global"):
+    def __init__(self, functions, namespace="__MAIN__"):
         self.function_signture_counter = 0
         self.namespace = namespace
         self.functions = functions
@@ -237,6 +237,9 @@ class IRGenerator:
             elif node.children[0] == 'selfof':
                 irs.extend(val)
                 irs.append(IR(IRType.SELF_OF))
+            elif node.children[0] == 'import':
+                irs.extend(val)
+                irs.append(IR(IRType.IMPORT))
             else:
                 raise ValueError(f"Unknown modifier: {node.children[0]}")
             return irs

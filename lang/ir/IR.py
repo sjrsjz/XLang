@@ -15,13 +15,13 @@ from .variable import (
     IndexOf,
     BuiltIn,
     Variable,
-    Named
+    Named,
 )
 
-import traceback
+import json
 import textwrap
 import asyncio
-
+import traceback
 
 class IRType(enum.Enum):
     LOAD_NONE = auto()  # 加载 None 到栈
@@ -52,11 +52,13 @@ class IRType(enum.Enum):
     JUMP_TO = auto()  # 无条件跳转到特定位置
     JUMP_IF_FALSE = auto()  # 如果栈顶为真则跳转
     RESET_STACK = auto()  # 重置栈
-    COPY_VAL = auto() # 复制值
-    REF_VAL = auto() # 引用值
-    DEREF_VAL = auto() # 取消引用值
-    ASSERT = auto() # 断言
+    COPY_VAL = auto()  # 复制值
+    REF_VAL = auto()  # 引用值
+    DEREF_VAL = auto()  # 取消引用值
+    ASSERT = auto()  # 断言
     DEBUG_INFO = auto()  # 调试信息
+    IMPORT = auto()  # 导入IR并执行
+
 
 class IR:
     def __init__(self, ir_type, value=None):
@@ -99,15 +101,15 @@ class Functions:
     def __repr__(self):
         return str(self)
 
-    def export_to_json(self):
+    def export_to_dict(self):
         json_data = {}
         for name, instructions in self.function_instructions.items():
             json_data[name] = []
             for instr in instructions:
-                json_data[name].append({instr.ir_type.name : instr.value})
+                json_data[name].append({instr.ir_type.name: instr.value})
         return json_data
 
-    def import_from_json(self, json_data):
+    def import_from_dict(self, json_data):
         self.function_instructions = {}
         for name, instructions in json_data.items():
             self.function_instructions[name] = []
@@ -115,14 +117,15 @@ class Functions:
                 for ir_type, value in instr.items():
                     self.function_instructions[name].append(IR(IRType[ir_type], value))
 
-def create_builtins(context):
+
+def create_builtins(context, output_printer=print, input_reader=input):
     def print_func(args):
         list_args = [arg.value for arg in args]
-        print(*list_args)
+        output_printer(*list_args)
         return NoneType()
 
     def input_func(args):
-        return String(input())
+        return String(input_reader())
 
     def len_func(args):
         obj = args[0]
@@ -131,7 +134,9 @@ def create_builtins(context):
         elif isinstance(obj, String):
             return Int(len(obj.value))
         else:
-            raise ValueError(f"len function's argument must be Tuple or String, but got {obj}")
+            raise ValueError(
+                f"len function's argument must be Tuple or String, but got {obj}"
+            )
 
     def type_func(args):
         obj = args[0]
@@ -165,38 +170,56 @@ def create_builtins(context):
         if isinstance(value, Tuple):
             value.values.pop(key.value)
         elif isinstance(value, String):
-            value.value = value.value[:key.value] + value.value[key.value + 1:]
+            value.value = value.value[: key.value] + value.value[key.value + 1 :]
         else:
-            raise ValueError(f"Delete function's first argument must be Tuple or String, but got {value}")
+            raise ValueError(
+                f"Delete function's first argument must be Tuple or String, but got {value}"
+            )
         return NoneType()
 
     def replace_func(args):
         value = args[0]
         key_value = args[1]
         if not isinstance(key_value, KeyValue):
-            raise ValueError(f"Replace function's second argument must be KeyValue, but got {key_value}")
+            raise ValueError(
+                f"Replace function's second argument must be KeyValue, but got {key_value}"
+            )
         key = key_value.key
         new_value = key_value.value
         if isinstance(key, Int):
             if isinstance(value, Tuple):
                 if key.value < 0 or key.value >= len(value.values):
-                    raise ValueError(f"Index out of range: {key.value}/{len(value.values)}")
+                    raise ValueError(
+                        f"Index out of range: {key.value}/{len(value.values)}"
+                    )
                 value.values[key.value] = new_value
             elif isinstance(value, String):
                 if key.value < 0 or key.value >= len(value.value):
-                    raise ValueError(f"Index out of range: {key.value}/{len(value.value)}")
-                value.value = value.value[:key.value] + new_value.value + value.value[key.value + 1:]
+                    raise ValueError(
+                        f"Index out of range: {key.value}/{len(value.value)}"
+                    )
+                value.value = (
+                    value.value[: key.value]
+                    + new_value.value
+                    + value.value[key.value + 1 :]
+                )
             else:
-                raise ValueError(f"Replace function's first argument must be Tuple or String, but got {value}")
+                raise ValueError(
+                    f"Replace function's first argument must be Tuple or String, but got {value}"
+                )
         elif isinstance(key, String):
             if not isinstance(value, Tuple):
-                raise ValueError(f"Replace function's first argument must be Tuple, but got {value}")
+                raise ValueError(
+                    f"Replace function's first argument must be Tuple, but got {value}"
+                )
             for i, v in enumerate(value.values):
                 if isinstance(v, KeyValue) and v.key == key:
                     value.values[i] = KeyValue(key, new_value)
                     return NoneType()
         else:
-            raise ValueError(f"Replace function's second argument must be Int or String, but got {key}")
+            raise ValueError(
+                f"Replace function's second argument must be Int or String, but got {key}"
+            )
 
     def sum_func(args):
         obj = args[0]
@@ -205,17 +228,23 @@ def create_builtins(context):
 
         sum_value = NoneType()
         for v in obj.values:
-            if not isinstance(v, Int) and not isinstance(v, Float) and not isinstance(v, String):
-                raise ValueError(f"sum function's element must be Int or Float or String, but got {v}")
+            if (
+                not isinstance(v, Int)
+                and not isinstance(v, Float)
+                and not isinstance(v, String)
+            ):
+                raise ValueError(
+                    f"sum function's element must be Int or Float or String, but got {v}"
+                )
             if isinstance(sum_value, NoneType):
                 sum_value = v
                 continue
             if isinstance(v, String) and not isinstance(sum_value, String):
                 sum_value = String(str(sum_value.value))
             if isinstance(sum_value, String) and not isinstance(v, String):
-                v = String(str(v.value))            
+                v = String(str(v.value))
             sum_value = sum_value + v
-        return sum_value            
+        return sum_value
 
     def max_func(args):
         obj = args[0]
@@ -225,7 +254,9 @@ def create_builtins(context):
         max_value = obj.values[0]
         for v in obj.values:
             if not isinstance(v, Int) and not isinstance(v, Float):
-                raise ValueError(f"max function's element must be Int or Float, but got {v}")
+                raise ValueError(
+                    f"max function's element must be Int or Float, but got {v}"
+                )
             if v > max_value:
                 max_value = v
         return max_value
@@ -238,7 +269,9 @@ def create_builtins(context):
         min_value = obj.values[0]
         for v in obj.values:
             if not isinstance(v, Int) and not isinstance(v, Float):
-                raise ValueError(f"min function's element must be Int or Float, but got {v}")
+                raise ValueError(
+                    f"min function's element must be Int or Float, but got {v}"
+                )
             if v < min_value:
                 min_value = v
         return min_value
@@ -248,15 +281,21 @@ def create_builtins(context):
         start = args[1]
         end = args[2]
         if not isinstance(start, Int):
-            raise ValueError(f"slice function's second argument must be Int, but got {start}")
+            raise ValueError(
+                f"slice function's second argument must be Int, but got {start}"
+            )
         if not isinstance(end, Int):
-            raise ValueError(f"slice function's third argument must be Int, but got {end}")
+            raise ValueError(
+                f"slice function's third argument must be Int, but got {end}"
+            )
         if isinstance(obj, Tuple):
-            return Tuple(obj.values[start.value:end.value])
+            return Tuple(obj.values[start.value : end.value])
         elif isinstance(obj, String):
-            return String(obj.value[start.value:end.value])
+            return String(obj.value[start.value : end.value])
         else:
-            raise ValueError(f"slice function's first argument must be Tuple or String, but got {obj}")
+            raise ValueError(
+                f"slice function's first argument must be Tuple or String, but got {obj}"
+            )
 
     def repr_func(args):
         return String(repr(args[0]))
@@ -278,39 +317,43 @@ def create_builtins(context):
     context.let("slice", BuiltIn(slice_func))
     context.let("repr", BuiltIn(repr_func))
 
+
 class IRExecutor:
-    def __init__(self, functions, origin_code = None):
+    def __init__(self, functions, origin_code=None):
         self.stack = []
         self.context = Context()
-        self.ip = 0  # 指令指针
-        self.instructions, self.func_ips = functions.build_instructions()
+        self.ip = [0]  # 指令指针
+        instructions, func_ips = functions.build_instructions()
+        self.instructions = [instructions] # 使用列表存储多个ir，用于支持 import
+        self.func_ips = [func_ips]
         self.origin_code = origin_code
         self.debug_info = None
-
+        self.error_printer = print
+        self.output_printer = print
+        self.input_reader = input
 
     def calculate_line_column(self, code_position):
         lines = self.origin_code.split("\n")
         line = 0
         column = 0
         remaining_position = code_position
-        
+
         for i, line_text in enumerate(lines):
             if remaining_position <= len(line_text):
                 line = i
                 column = remaining_position
                 break
             remaining_position -= len(line_text) + 1
-        
+
         return line, column
 
     def print_debug_info(self):
         code_positon = self.debug_info["code_position"]
 
         line, column = self.calculate_line_column(code_positon)
-        lines = self.origin_code.split("\n")        
+        lines = self.origin_code.split("\n")
 
-
-        print(f"# Error at line {line + 1}, column {column + 1}\n")
+        self.error_printer(f"# Error at line {line + 1}, column {column + 1}\n")
 
         # 可视化打印代码错误位置
 
@@ -325,72 +368,133 @@ class IRExecutor:
             print_code += lines[line + 1] + "\n"
 
         print_code = textwrap.dedent(print_code)
-        print("## Code:\n")
-        print("```")
-        print(print_code)
-        print("```")
-    def execute(self, entry="__main__"):
-        self.context.new_frame(self.stack, enter_func=True, funciton_code_position=0)
-        create_builtins(self.context)
+        self.error_printer("## Code:\n")
+        self.error_printer("```")
+        self.error_printer(print_code)
+        self.error_printer("```")
 
-        self.ip = self.func_ips[entry]
+    def execute(self, entry="__main__", output_printer=print, input_reader=input):
+        self.context.new_frame(
+            self.stack, enter_func=True, funciton_code_position=0, hidden=True
+        )
+        create_builtins(self.context, output_printer, input_reader)
+        self.output_printer = output_printer
+        self.input_reader = input_reader
+
+        self.ip[-1] = self.func_ips[-1][entry]
 
         try:
-            while self.ip < len(self.instructions):
-                instr = self.instructions[self.ip]
+            while self.ip[-1] < len(self.instructions[-1]):
+                instr = self.instructions[-1][self.ip[-1]]
                 self.execute_instruction(instr)
-                self.ip += 1
+                self.ip[-1] += 1
         except Exception as e:
-            print(f"# Error: {e}\n")
-            print(f"# ip: {self.ip}, ir: {instr}\n")
+            self.error_printer(f"# Error: {e}\n")
+            self.error_printer(f"# ip: {self.ip[-1]}, ir: {instr}\n")
 
             if self.origin_code is not None and self.debug_info is not None:
                 self.print_debug_info()
 
             error, code_positions = self.context.format_stack_and_frames(self.stack)
-            print(error)
-            print("\n# Traceback (most recent call last):")
+            self.error_printer(error)
+            self.error_printer("\n# Traceback (most recent call last):")
+            self.error_printer("```")
             # 根据code_positions打印代码执行位置
             lines = self.origin_code.split("\n")
             for code_position in code_positions:
                 line, column = self.calculate_line_column(code_position)
-                print(f"## line {line + 1}, column {column + 1}")
+                self.error_printer(f"## line {line + 1}, column {column + 1}")
                 print_code = ""
                 print_code += lines[line] + "\n"
                 print_code += "-" * column + "^" + "\n"
-                print(print_code)
+                self.error_printer(print_code)
+            self.error_printer("```")
+            print(traceback.format_exc())
+            raise e
+        finally:
+            self.context.pop_frame(self.stack, exit_func=True)
 
-
-        self.context.pop_frame(self.stack, exit_func=True)
-
-    async def async_execute(self, entry="__main__"):
+    async def async_execute(
+        self, entry="__main__", output_printer=print, input_reader=input
+    ):
         self.context.new_frame(self.stack)
-        create_builtins(self.context)
+        create_builtins(self.context, output_printer, input_reader)
 
-        self.ip = self.func_ips[entry]
+        self.ip[-1] = self.func_ips[-1][entry]
 
         step_counter = 0
 
         try:
-            while self.ip < len(self.instructions):
-                instr = self.instructions[self.ip]
+            while self.ip[-1] < len(self.instructions[-1]):
+                instr = self.instructions[self.ip[-1]]
                 self.execute_instruction(instr)
-                self.ip += 1
+                self.ip[-1] += 1
                 step_counter += 1
                 if step_counter > 1000:
                     step_counter = 0
                     await asyncio.sleep(0)
         except Exception as e:
-            print(f"# Error: {e}\n")
-            print(f"# ip: {self.ip}, ir: {instr}\n")
+            self.error_printer(f"# Error: {e}\n")
+            self.error_printer(f"# ip: {self.ip[-1]}, ir: {instr}\n")
 
             if self.origin_code is not None and self.debug_info is not None:
                 self.print_debug_info()
 
             self.context.print_stack_and_frames(self.stack)
+            raise e
+        finally:
+            self.context.pop_frame(self.stack)
 
-        self.context.pop_frame(self.stack)
+    def execute_with_let(
+        self,
+        entry="__main__",
+        let_dict={},
+        export_varible_name="__export__",
+        output_printer=print,
+        input_reader=input,
+    ):
+        self.context.new_frame(
+            self.stack, enter_func=True, funciton_code_position=0, hidden=True
+        )
+        for key, value in let_dict.items():
+            self.context.let(key, Variable(value))
+        self.context.let(export_varible_name, Variable(NoneType()))
+        result = NoneType()
+        try:
+            self.execute(entry, output_printer, input_reader)
+            result = self.context.get(export_varible_name)
+        except Exception as e:
+            raise e
+        finally:
+            self.context.pop_frame(self.stack, exit_func=True)
+            return result
 
+    async def async_execute_with_let(
+        self,
+        entry="__main__",
+        let_dict={},
+        export_varible_name="__export__",
+        output_printer=print,
+        input_reader=input,
+    ):
+        self.context.new_frame(
+            self.stack, enter_func=True, funciton_code_position=0, hidden=True
+        )
+        self.output_printer = output_printer
+        self.input_reader = input_reader
+
+        for key, value in let_dict.items():
+            self.context.let(key, Variable(value))
+        self.context.let(export_varible_name, Variable(NoneType()))
+        result = NoneType()
+        try:
+            self.execute(entry, output_printer, input_reader)
+            result = self.context.get(export_varible_name)
+        except Exception as e:
+            raise e
+        finally:
+            self.context.pop_frame(self.stack, exit_func=True)
+            return result
 
     def execute_instruction(self, instr):
         if instr.ir_type == IRType.LOAD_INT:
@@ -409,8 +513,10 @@ class IRExecutor:
             self.stack.append(NoneType())
 
         elif instr.ir_type == IRType.LOAD_LAMBDA:
-            default_args = self.stack.pop().object_ref()  # 获取默认参数，这里是一个tuple
-            self.stack.append(Lambda(instr.value[1], default_args, instr.value[0]))
+            default_args = (
+                self.stack.pop().object_ref()
+            )  # 获取默认参数，这里是一个tuple
+            self.stack.append(Lambda(instr.value[1], default_args, instr.value[0], self.func_ips[-1], self.instructions[-1]))
 
         elif instr.ir_type == IRType.BUILD_TUPLE:
             count = instr.value
@@ -485,9 +591,21 @@ class IRExecutor:
                 self.stack.append(result)
                 return
             elif isinstance(func, Lambda):
-                self.stack.append(self.ip)  # 保存当前ip
+
+                not_local_ir = False
+                if not func.lambda_ir is self.instructions:
+                    self.instructions.append(func.lambda_ir)
+                    self.func_ips.append(func.lambda_ir_table)
+                    not_local_ir = True
+
+                self.stack.append((self.ip[-1], not_local_ir))  # 保存当前ip和是否是外部ir
+
                 # 建立参数帧
-                self.context.new_frame(self.stack, enter_func=True, funciton_code_position = func.code_position)
+                self.context.new_frame(
+                    self.stack,
+                    enter_func=True,
+                    funciton_code_position=func.code_position,
+                )
                 # 获取函数
                 signature = func.signature  # 获取函数签名
                 default_args = func.default_args_tuple  # 获取默认参数
@@ -497,24 +615,34 @@ class IRExecutor:
                 # 将默认参数进行let
                 for v in default_args.values:
                     if not isinstance(v, Named):
-                        raise ValueError(f"Lambda {func} default args must be Named, but got {v}")
+                        raise ValueError(
+                            f"Lambda {func} default args must be Named, but got {v}"
+                        )
                     self.context.let(v.key.value, v.value)
 
                 if not isinstance(func.self_object, NoneType):
                     self.context.let("self", func.self_object)
 
-                ip = self.func_ips[signature]  # 获取函数入口地址
-                self.ip = ip - 1  # -1是因为后面会+1
+                ip = self.func_ips[-1][signature]  # 获取函数入口地址
+                self.ip[-1] = ip - 1  # -1是因为后面会+1
             else:
                 raise ValueError(f"Object: {func} is not callable")
         elif instr.ir_type == IRType.RETURN:
             result = self.stack.pop()
             self.context.pop_frame(self.stack, exit_func=True)
-            self.ip = self.stack.pop()
+            ip_info = self.stack.pop()
+            self.ip[-1] = ip_info[0]
+            if ip_info[1]:
+                self.instructions.pop() # 删除外部ir
+                self.func_ips.pop()
             self.stack.append(result)
 
         elif instr.ir_type == IRType.RETURN_NONE:
-            self.ip = self.stack.pop()
+            ip_info = self.stack.pop()
+            self.ip[-1] = ip_info[0]
+            if ip_info[1]:
+                self.instructions.pop()
+                self.func_ips.pop()
             self.context.pop_frame(self.stack, exit_func=True)
             self.stack.append(NoneType())
 
@@ -527,17 +655,17 @@ class IRExecutor:
             self.context.pop_frame(self.stack)
 
         elif instr.ir_type == IRType.JUMP_OFFSET:
-            self.ip += instr.value
+            self.ip[-1] += instr.value
 
         elif instr.ir_type == IRType.JUMP_IF_FALSE:
             condition = self.stack.pop().object_ref()
             if not isinstance(condition, Bool):
                 raise ValueError(f"Condition is not bool: {condition}")
             if not condition.value:
-                self.ip += instr.value
+                self.ip[-1] += instr.value
 
         elif instr.ir_type == IRType.JUMP_TO:
-            self.ip = instr.value
+            self.ip[-1] = instr.value
 
         elif instr.ir_type == IRType.GET_ATTR:
             attr_name = self.stack.pop().object_ref()
@@ -569,7 +697,7 @@ class IRExecutor:
             obj = self.stack.pop().object_ref()
             if isinstance(obj, KeyValue) or isinstance(obj, Named):
                 self.stack.append(obj.key)
-            if isinstance(obj, Lambda):
+            elif isinstance(obj, Lambda):
                 self.stack.append(obj.default_args_tuple)
             else:
                 raise ValueError(f"Object is not KeyValue or Named: {obj}")
@@ -601,3 +729,18 @@ class IRExecutor:
 
         elif instr.ir_type == IRType.DEBUG_INFO:
             self.debug_info = instr.value
+
+        elif instr.ir_type == IRType.IMPORT:
+            # 导入IR并执行
+            path = self.stack.pop().object_ref()
+            if not isinstance(path, String):
+                raise ValueError(f"Import path must be String, but got {path}")
+
+            with open(path.value, "r", encoding="utf-8") as f:
+                code = f.read()
+            irs = json.loads(code)
+            functions = Functions()
+            functions.import_from_dict(irs)
+            executor = IRExecutor(functions, code)
+            result = executor.execute_with_let(entry="__main__", export_varible_name="__export__", output_printer=self.output_printer, input_reader=self.input_reader)
+            self.stack.append(result)

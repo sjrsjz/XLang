@@ -131,6 +131,20 @@ b := ref a;
 print(deref b);  // 输出: 1
 ```
 
+### 内置函数
+
+X Lang 提供了多种内置函数：
+
+- `print` - 打印到控制台
+- `input` - 从控制台读取输入
+- `len` - 获取元组或字符串的长度
+- `type` - 获取对象的类型
+- `int`, `float`, `str`, `bool` - 类型转换
+- `range` - 创建数值范围
+- `sum`, `min`, `max` - 聚合操作
+- `slice` - 元组或字符串切片操作
+- `repr` - 获取对象的字符串表示
+
 ### 函数式
 ```
 // Z组合子的实现
@@ -138,7 +152,7 @@ print(deref b);  // 输出: 1
 
 Z := (f => (x => null) -> { return x(x); }) -> {
     return f((x => null, f => f) -> {
-        return f(Z(f))(x,y);
+        return f(Z(f))(x);
     });
 };
 

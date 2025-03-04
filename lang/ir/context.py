@@ -6,8 +6,8 @@ class Context:
         self.frames = []
         self.stack_pointers = []
 
-    def new_frame(self, stack, enter_func = False, funciton_code_position = None):
-        self.frames.append(({}, enter_func, funciton_code_position))
+    def new_frame(self, stack, enter_func = False, funciton_code_position = None, hidden = False):
+        self.frames.append(({}, enter_func, funciton_code_position, hidden))
         self.stack_pointers.append(len(stack))
 
     def pop_frame(self, stack, exit_func = False):
@@ -90,14 +90,16 @@ class Context:
         if not self.frames:
             result.append("  - <Empty>")
         else:
-            for i, (frame, is_func, code_position) in enumerate(self.frames):
+            for i, (frame, is_func, code_position, hidden) in enumerate(self.frames):
                 if is_func:
                     collected_code_positions.append(code_position)
                 frame_type = (
                     f"function, code_position = {code_position}" if is_func else "normal"
                 )
                 result.append(f"  + frame {i} ({frame_type}):")
-                if not frame:
+                if hidden:
+                    result.append("    - <Hidden>")
+                elif not frame:
                     result.append("    - <Empty>")
                 else:
                     for var_name, var_value in frame.items():

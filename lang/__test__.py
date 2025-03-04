@@ -1,6 +1,5 @@
-from lang.ir.IR import IRExecutor, Functions
-from lang.parser import build_ast
-from lang.parser.IR_generator import IRGenerator
+from .xlang.lang import XLang
+import json
 
 def test():
 
@@ -54,17 +53,95 @@ print(expensiveComputation()); // 输出: Computing... 然后 42
 // 再次调用直接返回缓存的结果
 print(expensiveComputation()); // 输出: 42"""
 
-    ast = build_ast(code)
-    functions = Functions()
-    # print(ast)
+    code = """
+    mutistr := (str => "", n => 0) -> {
+        result := "";
 
-    generator = IRGenerator(functions=functions)
-    IRs = generator.generate(ast)
-    functions.add("__main__", IRs)
+        i := 0; while (i = i + 1; i <= n) {
+            result = result + str;
+        };
 
-    # print(functions)
-    executor = IRExecutor(functions, code)
-    executor.execute()
+        return result;
+    };
+    print(mutistr("a", 5)); // 输出: aaaaa
+
+    
+    loop := (func => (n => 0) -> {return false}) -> {
+        return (n => 0, func => func) -> {
+            while (func(n)) {
+                n = n + 1;
+            };      
+        };
+    };
+
+    loop_func := loop((n => 0) -> {
+        print(n);
+        return n < 5;
+    });
+
+    loop_func();
+
+    iter := (container => ('T' : null), n => 0) -> {
+        n = n + 1;
+        E := valueof container;
+        T := keyof container;
+        if (n <= len(T)) {
+            (deref E) = T[n - 1];
+            return true;
+        } else {
+            return false;
+        };
+    };
+
+    arr := range(0, 100);
+    elem := 0;
+    while (iter(arr: ref elem)) {
+        print(elem);
+    };
+
+"""
+    module = """
+    __export__ = (
+        'iter': (container => ('T' : null), n => 0) -> {
+            n = n + 1;
+            E := valueof container;
+            T := keyof container;
+            if (n <= len(T)) {
+                (deref E) = T[n - 1];
+                return true;
+            } else {
+                return false;
+            };
+        },
+        'loop': (func => (n => 0) -> {return false}) -> {
+            return (n => 0, func => func) -> {
+                while (func(n)) {
+                    n = n + 1;
+                };
+            };
+        }
+    );
+
+    """
+
+    code = """
+    module := import "modules/test.xir";
+    print(repr(module));
+
+    loop_func := module.loop((n => 0) -> {
+        print(n);
+        return n < 5;
+    });
+
+    loop_func();
+"""
+
+    xlang = XLang()
+    ir = xlang.compile(module)
+    with open("modules/test.xir", "w", encoding='utf-8') as f:
+        f.write(json.dumps(ir.export_to_dict(), indent=2, ensure_ascii=False))
+    result = xlang.execute(code)
+    print(result)
 
 
 if __name__ == "__main__":

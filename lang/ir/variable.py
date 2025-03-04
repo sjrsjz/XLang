@@ -336,11 +336,13 @@ class KeyValue:
         return self.value.object_ref().get_member(key)
 
 class Lambda:
-    def __init__(self, code_position, default_args_tuple, signature):
+    def __init__(self, code_position, default_args_tuple, signature, lambda_ir_table, lambda_ir):
         self.code_position = code_position
         self.signature = signature
         self.default_args_tuple = default_args_tuple
         self.self_object = NoneType()
+        self.lambda_ir_table = lambda_ir_table # 用于存储 lambda 函数的 IR 的映射表
+        self.lambda_ir = lambda_ir # 用于存储 lambda 函数的 IR
 
     def __str__(self):
         return f"Lambda({self.signature}, default_args = {self.default_args_tuple}, self = {self.self_object}, code_position = {self.code_position})"
@@ -356,7 +358,7 @@ class Lambda:
         return self
 
     def copy(self):
-        return Lambda(self.code_position, self.default_args_tuple.copy(), self.signature)
+        return Lambda(self.code_position, self.default_args_tuple.copy(), self.signature, self.lambda_ir_table, self.lambda_ir)
 
 
 class Tuple:
