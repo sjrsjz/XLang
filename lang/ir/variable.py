@@ -400,6 +400,13 @@ class Tuple:
                 return value.value
         raise KeyError(f"'{key}' not found in Tuple")
 
+    def set_member(self, key, value):
+        for item in self.values:
+            if item.check_key(key):
+                item.value = value
+                return
+        raise KeyError(f"'{key}' not found in Tuple")
+    
     def copy(self):
         copyed_values = []
         for value in self.values:
@@ -456,12 +463,7 @@ class Tuple:
 
             if normal_index < len(self.values):
                 # 找到位置，进行赋值
-                if hasattr(self.values[normal_index], "assgin") and hasattr(
-                    value, "object_ref"
-                ):
-                    self.values[normal_index].assgin(value.object_ref())
-                else:
-                    self.values[normal_index] = value
+                self.values[normal_index].assgin(value.object_ref())
                 normal_index += 1
             else:
                 # 没有更多位置，追加到末尾
@@ -486,7 +488,7 @@ class GetAttr:
         return self.obj.object_ref().get_member(self.key).object_ref()
 
     def assgin(self, value):
-        self.object_ref().assgin(value)
+        self.obj.object_ref().set_member(self.key, value)
 
 
 class IndexOf:
@@ -510,7 +512,7 @@ class IndexOf:
         return self.obj.object_ref().values[self.index].object_ref()
 
     def assgin(self, value):
-        self.object_ref().assgin(value)
+        self.obj.object_ref().values[self.index] = value
 
 
 class BuiltIn:

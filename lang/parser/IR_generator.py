@@ -168,11 +168,13 @@ class IRGenerator:
                 if child != node.children[-1]:
                     irs.append(IR(IRType.RESET_STACK))
             return irs
-        elif node_type == XLangASTNodeTypes.NONE:
+        elif node_type == XLangASTNodeTypes.NULL:
             irs = []
             irs.append(debug_info)
             irs.append(IR(IRType.LOAD_NONE))
             return irs
+        elif node_type == XLangASTNodeTypes.NONE:
+            return [] # None is a no-op
         elif node_type == XLangASTNodeTypes.BOOLEN:
             irs = []
             irs.append(debug_info)

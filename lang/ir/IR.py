@@ -501,6 +501,8 @@ class IRExecutor:
             obj = self.stack.pop().object_ref()
             if isinstance(obj, KeyValue) or isinstance(obj, Named):
                 self.stack.append(obj.key)
+            if isinstance(obj, Lambda):
+                self.stack.append(obj.default_args_tuple)
             else:
                 raise ValueError(f"Object is not KeyValue or Named: {obj}")
 

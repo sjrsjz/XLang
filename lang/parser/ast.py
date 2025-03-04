@@ -195,6 +195,7 @@ def _is_identifier(token_list, symbol):
 
 class XLangASTNodeTypes(enum.Enum):
     NONE = auto()
+    NULL = auto()
     STRING = auto()
     BOOLEN = auto()
     NUMBER = auto()
@@ -1128,7 +1129,7 @@ class XLangVariable:
         if _is_identifier(self.token_list[start_idx], "null"):
             return (
                 XLangASTNode(
-                    XLangASTNodeTypes.NONE, None, self.token_list[start_idx][0]['position']
+                    XLangASTNodeTypes.NULL, None, self.token_list[start_idx][0]['position']
                 ),
                 1,
             )

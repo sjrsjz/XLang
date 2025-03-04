@@ -237,7 +237,59 @@ print(lambda());
     print(repr(test_func));
 
     """
+    code = r"""// 创建一个DSL来构建HTML
+html := (tag => "", attrs => (), children => ()) -> {
+    buildAttrs := () -> {
+        result := "";
+        i := 0;
+        while (i < len(attrs)) {
+            attr := attrs[i];
+            result = result + " " + keyof attr + "=\"" + valueof attr + "\"";
+            i = i + 1;
+        };
+        return result;
+    };
+    
+    buildChildren := () -> {
+        result := "";
+        i := 0;
+        while (i < len(children)) {
+            result = result + children[i];
+            i = i + 1;
+        };
+        return result;
+    };
+    
+    if (len(children) == 0) {
+        return "<" + tag + buildAttrs() + "/>";
+    } else {
+        return "<" + tag + buildAttrs() + ">" + buildChildren() + "</" + tag + ">";
+    };
+};
 
+// 创建常用HTML标签函数
+div := (attrs => (), children => ()) -> { return html("div", attrs, children); };
+span := (attrs => (), children => ()) -> { return html("span", attrs, children); };
+h1 := (attrs => (), children => ()) -> { return html("h1", attrs, children); };
+p := (attrs => (), children => ()) -> { return html("p", attrs, children); };
+
+// 使用DSL构建HTML
+page := div(
+    (
+        'class' => "container",
+        'id' => "main"
+    ),
+    (
+        h1((), ("Welcome to X Lang",)),
+        p(('class' => "intro",), ("X Lang is a flexible language with powerful features",)),
+        div(('class' => "content",), (
+            p((), ("This page was generated using X Lang's DSL capabilities",)),
+            span(('style' => "color:blue",), ("Isn't that cool?",))
+        ))
+    )
+);
+
+print(page);"""
     code = r"""
 
 // 创建一个关系表结构
@@ -348,7 +400,7 @@ createTable := (columns => ()) -> {
                     };
                     
                     if (shouldSwap) {
-                        temp := copy result[j];
+                        temp := result[j];
                         result[j] = result[j+1];
                         result[j+1] = temp;
                     };
@@ -364,6 +416,7 @@ createTable := (columns => ()) -> {
         'display': (rows => null) -> {
             rowsToShow := rows;
             if (rowsToShow == null) {
+                print("显示所有数据:");
                 rowsToShow = self.rows;
             };
             // 打印表头
@@ -431,7 +484,7 @@ employeeTable.update(
         return newRow;
     }
 );
-employeeTable.display();
+employeeTable.display(null);
 
 nameIndex := employeeTable.getColumnIndex("name");
 
