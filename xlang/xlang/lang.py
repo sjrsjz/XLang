@@ -1,7 +1,8 @@
-from lang.ir.IR import IRExecutor, Functions
-from lang.parser import build_ast
-from lang.parser.IR_generator import IRGenerator
-from lang.ir.variable import *
+from xlang.ir.IR import IRExecutor, Functions
+from xlang.parser import build_ast
+from xlang.parser.IR_generator import IRGenerator
+from xlang.ir.variable import *
+
 
 class XLang:
     def __init__(self):
@@ -28,7 +29,7 @@ class XLang:
 
     def python_to_x(self, py_value):
         """将Python值转换为X语言值"""
-        from lang.ir.variable import Int, Float, Bool, String, Tuple, KeyValue, NoneType
+        from xlang.ir.variable import Int, Float, Bool, String, Tuple, KeyValue, NoneType
 
         if isinstance(py_value, int):
             return Int(py_value)
@@ -59,28 +60,15 @@ class XLang:
         functions.add("__main__", IRs)
         return functions
 
-    def execute(self, code, entry = "__main__", export_varible_name="__export__", output_printer = print, input_reader = input, **kwargs):
-        """执行X语言代码并返回结果"""
-        ast = build_ast(code)
-        functions = Functions()
-        generator = IRGenerator(functions=functions)
-        IRs = generator.generate(ast)
-        functions.add("__main__", IRs)
-        executor = IRExecutor(functions, code)
-
-        executor_args = {}
-        for k, v in kwargs.items():
-            executor_args[k] = self.python_to_x(v)
-        result = executor.execute_with_let(entry, executor_args, export_varible_name, output_printer, input_reader)
-        return self.x_to_python(result)
-
-    async def async_execute(
+    def execute(
         self,
         code,
         entry="__main__",
         export_varible_name="__export__",
+        error_printer=print,
         output_printer=print,
         input_reader=input,
+        should_stop_func=None,
         **kwargs,
     ):
         """执行X语言代码并返回结果"""
@@ -89,12 +77,10 @@ class XLang:
         generator = IRGenerator(functions=functions)
         IRs = generator.generate(ast)
         functions.add("__main__", IRs)
-        executor = IRExecutor(functions, code)
-
+        executor = IRExecutor(functions, code, error_printer, output_printer, input_reader, should_stop_func)
         executor_args = {}
         for k, v in kwargs.items():
             executor_args[k] = self.python_to_x(v)
-        result = await executor.async_execute_with_let(
-            entry, executor_args, export_varible_name, output_printer, input_reader
-        )
+        result = executor.execute_with_let(entry, executor_args, export_varible_name)
         return self.x_to_python(result)
+

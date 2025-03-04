@@ -319,7 +319,7 @@ def create_builtins(context, output_printer=print, input_reader=input):
 
 
 class IRExecutor:
-    def __init__(self, functions, origin_code=None):
+    def __init__(self, functions, origin_code=None, error_printer = print, output_printer=print, input_reader=input, should_stop_func=None):
         self.stack = []
         self.context = Context()
         self.ip = [0]  # 指令指针
@@ -328,9 +328,10 @@ class IRExecutor:
         self.func_ips = [func_ips]
         self.origin_code = origin_code
         self.debug_info = None
-        self.error_printer = print
-        self.output_printer = print
-        self.input_reader = input
+        self.error_printer = error_printer
+        self.output_printer = output_printer
+        self.input_reader = input_reader
+        self.check_should_stop = should_stop_func
 
     def calculate_line_column(self, code_position):
         lines = self.origin_code.split("\n")
@@ -373,14 +374,11 @@ class IRExecutor:
         self.error_printer(print_code)
         self.error_printer("```")
 
-    def execute(self, entry="__main__", output_printer=print, input_reader=input):
+    def execute(self, entry="__main__"):
         self.context.new_frame(
             self.stack, enter_func=True, funciton_code_position=0, hidden=True
         )
-        create_builtins(self.context, output_printer, input_reader)
-        self.output_printer = output_printer
-        self.input_reader = input_reader
-
+        create_builtins(self.context, self.output_printer, self.input_reader)
         self.ip[-1] = self.func_ips[-1][entry]
 
         try:
@@ -388,6 +386,8 @@ class IRExecutor:
                 instr = self.instructions[-1][self.ip[-1]]
                 self.execute_instruction(instr)
                 self.ip[-1] += 1
+                if self.check_should_stop is not None and self.check_should_stop():
+                    raise ValueError("Cancelled due to should_stop_func")
         except Exception as e:
             self.error_printer(f"# Error: {e}\n")
             self.error_printer(f"# ip: {self.ip[-1]}, ir: {instr}\n")
@@ -409,49 +409,15 @@ class IRExecutor:
                 print_code += "-" * column + "^" + "\n"
                 self.error_printer(print_code)
             self.error_printer("```")
-            print(traceback.format_exc())
             raise e
         finally:
             self.context.pop_frame(self.stack, exit_func=True)
-
-    async def async_execute(
-        self, entry="__main__", output_printer=print, input_reader=input
-    ):
-        self.context.new_frame(self.stack)
-        create_builtins(self.context, output_printer, input_reader)
-
-        self.ip[-1] = self.func_ips[-1][entry]
-
-        step_counter = 0
-
-        try:
-            while self.ip[-1] < len(self.instructions[-1]):
-                instr = self.instructions[self.ip[-1]]
-                self.execute_instruction(instr)
-                self.ip[-1] += 1
-                step_counter += 1
-                if step_counter > 1000:
-                    step_counter = 0
-                    await asyncio.sleep(0)
-        except Exception as e:
-            self.error_printer(f"# Error: {e}\n")
-            self.error_printer(f"# ip: {self.ip[-1]}, ir: {instr}\n")
-
-            if self.origin_code is not None and self.debug_info is not None:
-                self.print_debug_info()
-
-            self.context.print_stack_and_frames(self.stack)
-            raise e
-        finally:
-            self.context.pop_frame(self.stack)
 
     def execute_with_let(
         self,
         entry="__main__",
         let_dict={},
         export_varible_name="__export__",
-        output_printer=print,
-        input_reader=input,
     ):
         self.context.new_frame(
             self.stack, enter_func=True, funciton_code_position=0, hidden=True
@@ -461,34 +427,7 @@ class IRExecutor:
         self.context.let(export_varible_name, Variable(NoneType()))
         result = NoneType()
         try:
-            self.execute(entry, output_printer, input_reader)
-            result = self.context.get(export_varible_name)
-        except Exception as e:
-            raise e
-        finally:
-            self.context.pop_frame(self.stack, exit_func=True)
-            return result
-
-    async def async_execute_with_let(
-        self,
-        entry="__main__",
-        let_dict={},
-        export_varible_name="__export__",
-        output_printer=print,
-        input_reader=input,
-    ):
-        self.context.new_frame(
-            self.stack, enter_func=True, funciton_code_position=0, hidden=True
-        )
-        self.output_printer = output_printer
-        self.input_reader = input_reader
-
-        for key, value in let_dict.items():
-            self.context.let(key, Variable(value))
-        self.context.let(export_varible_name, Variable(NoneType()))
-        result = NoneType()
-        try:
-            self.execute(entry, output_printer, input_reader)
+            self.execute(entry)
             result = self.context.get(export_varible_name)
         except Exception as e:
             raise e
@@ -741,6 +680,6 @@ class IRExecutor:
             irs = json.loads(code)
             functions = Functions()
             functions.import_from_dict(irs)
-            executor = IRExecutor(functions, code)
-            result = executor.execute_with_let(entry="__main__", export_varible_name="__export__", output_printer=self.output_printer, input_reader=self.input_reader)
+            executor = IRExecutor(functions, code, self.error_printer, self.output_printer, self.input_reader, self.check_should_stop)
+            result = executor.execute_with_let(entry="__main__", export_varible_name="__export__")
             self.stack.append(result)

@@ -1,3 +1,6 @@
 **/__pycache__
 .VSCodeCounter
 old
+build
+dist
+*.egg-info

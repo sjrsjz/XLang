@@ -1,0 +1,1532 @@
+{
+  "__MAIN__::__function_1__": [
+    {
+      "DEBUG_INFO": {
+        "code_position": 40
+      }
+    },
+    {
+      "NEW_FRAME": null
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 40
+      }
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 40
+      }
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 50
+      }
+    },
+    {
+      "LOAD_STRING": ""
+    },
+    {
+      "LET_VAL": "result"
+    },
+    {
+      "RESET_STACK": null
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 59
+      }
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 64
+      }
+    },
+    {
+      "LOAD_INT": 0
+    },
+    {
+      "LET_VAL": "i"
+    },
+    {
+      "RESET_STACK": null
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 67
+      }
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 74
+      }
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 74
+      }
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 74
+      }
+    },
+    {
+      "GET_VAL": "i"
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": null
+      }
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 78
+      }
+    },
+    {
+      "GET_VAL": "i"
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 82
+      }
+    },
+    {
+      "LOAD_INT": 1
+    },
+    {
+      "BINARAY_OP": "+"
+    },
+    {
+      "SET_VAL": null
+    },
+    {
+      "RESET_STACK": null
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": null
+      }
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 85
+      }
+    },
+    {
+      "GET_VAL": "i"
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 90
+      }
+    },
+    {
+      "GET_VAL": "n"
+    },
+    {
+      "BINARAY_OP": "<="
+    },
+    {
+      "JUMP_IF_FALSE": 16
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 93
+      }
+    },
+    {
+      "NEW_FRAME": null
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 103
+      }
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 103
+      }
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 103
+      }
+    },
+    {
+      "GET_VAL": "result"
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": null
+      }
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 112
+      }
+    },
+    {
+      "GET_VAL": "result"
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 121
+      }
+    },
+    {
+      "GET_VAL": "str"
+    },
+    {
+      "BINARAY_OP": "+"
+    },
+    {
+      "SET_VAL": null
+    },
+    {
+      "RESET_STACK": null
+    },
+    {
+      "POP_FRAME": null
+    },
+    {
+      "JUMP_OFFSET": -35
+    },
+    {
+      "RESET_STACK": null
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 138
+      }
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 145
+      }
+    },
+    {
+      "GET_VAL": "result"
+    },
+    {
+      "RETURN": null
+    },
+    {
+      "RESET_STACK": null
+    },
+    {
+      "POP_FRAME": null
+    },
+    {
+      "RETURN_NONE": null
+    }
+  ],
+  "__MAIN__::__function_2__": [
+    {
+      "DEBUG_INFO": {
+        "code_position": 225
+      }
+    },
+    {
+      "NEW_FRAME": null
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 225
+      }
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 232
+      }
+    },
+    {
+      "LOAD_BOOL": false
+    },
+    {
+      "RETURN": null
+    },
+    {
+      "POP_FRAME": null
+    },
+    {
+      "RETURN_NONE": null
+    }
+  ],
+  "__MAIN__::__function_3__::__function_1__": [
+    {
+      "DEBUG_INFO": {
+        "code_position": 292
+      }
+    },
+    {
+      "NEW_FRAME": null
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 292
+      }
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 292
+      }
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 299
+      }
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 299
+      }
+    },
+    {
+      "GET_VAL": "func"
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 299
+      }
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 304
+      }
+    },
+    {
+      "GET_VAL": "n"
+    },
+    {
+      "BUILD_TUPLE": 1
+    },
+    {
+      "CALL_LAMBDA": null
+    },
+    {
+      "JUMP_IF_FALSE": 16
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 308
+      }
+    },
+    {
+      "NEW_FRAME": null
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 322
+      }
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 322
+      }
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 322
+      }
+    },
+    {
+      "GET_VAL": "n"
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": null
+      }
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 326
+      }
+    },
+    {
+      "GET_VAL": "n"
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 330
+      }
+    },
+    {
+      "LOAD_INT": 1
+    },
+    {
+      "BINARAY_OP": "+"
+    },
+    {
+      "SET_VAL": null
+    },
+    {
+      "RESET_STACK": null
+    },
+    {
+      "POP_FRAME": null
+    },
+    {
+      "JUMP_OFFSET": -25
+    },
+    {
+      "RESET_STACK": null
+    },
+    {
+      "POP_FRAME": null
+    },
+    {
+      "RETURN_NONE": null
+    }
+  ],
+  "__MAIN__::__function_3__": [
+    {
+      "DEBUG_INFO": {
+        "code_position": 249
+      }
+    },
+    {
+      "NEW_FRAME": null
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 249
+      }
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 249
+      }
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 256
+      }
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 257
+      }
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 257
+      }
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 257
+      }
+    },
+    {
+      "LOAD_STRING": "n"
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 262
+      }
+    },
+    {
+      "LOAD_INT": 0
+    },
+    {
+      "BUILD_NAMED": null
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 265
+      }
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 265
+      }
+    },
+    {
+      "LOAD_STRING": "func"
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 273
+      }
+    },
+    {
+      "GET_VAL": "func"
+    },
+    {
+      "BUILD_NAMED": null
+    },
+    {
+      "BUILD_TUPLE": 2
+    },
+    {
+      "LOAD_LAMBDA": [
+        "__MAIN__::__function_3__::__function_1__",
+        256
+      ]
+    },
+    {
+      "RETURN": null
+    },
+    {
+      "RESET_STACK": null
+    },
+    {
+      "POP_FRAME": null
+    },
+    {
+      "RETURN_NONE": null
+    }
+  ],
+  "__MAIN__::__function_4__": [
+    {
+      "DEBUG_INFO": {
+        "code_position": 397
+      }
+    },
+    {
+      "NEW_FRAME": null
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 397
+      }
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 397
+      }
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 397
+      }
+    },
+    {
+      "GET_VAL": "print"
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 397
+      }
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 403
+      }
+    },
+    {
+      "GET_VAL": "n"
+    },
+    {
+      "BUILD_TUPLE": 1
+    },
+    {
+      "CALL_LAMBDA": null
+    },
+    {
+      "RESET_STACK": null
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 411
+      }
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": null
+      }
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 418
+      }
+    },
+    {
+      "GET_VAL": "n"
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 422
+      }
+    },
+    {
+      "LOAD_INT": 5
+    },
+    {
+      "BINARAY_OP": "<"
+    },
+    {
+      "RETURN": null
+    },
+    {
+      "RESET_STACK": null
+    },
+    {
+      "POP_FRAME": null
+    },
+    {
+      "RETURN_NONE": null
+    }
+  ],
+  "__MAIN__::__function_5__": [
+    {
+      "DEBUG_INFO": {
+        "code_position": 497
+      }
+    },
+    {
+      "NEW_FRAME": null
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 497
+      }
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 497
+      }
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 497
+      }
+    },
+    {
+      "GET_VAL": "n"
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": null
+      }
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 501
+      }
+    },
+    {
+      "GET_VAL": "n"
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 505
+      }
+    },
+    {
+      "LOAD_INT": 1
+    },
+    {
+      "BINARAY_OP": "+"
+    },
+    {
+      "SET_VAL": null
+    },
+    {
+      "RESET_STACK": null
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 512
+      }
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": null
+      }
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 525
+      }
+    },
+    {
+      "GET_VAL": "container"
+    },
+    {
+      "VALUE_OF": null
+    },
+    {
+      "LET_VAL": "E"
+    },
+    {
+      "RESET_STACK": null
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 540
+      }
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": null
+      }
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 551
+      }
+    },
+    {
+      "GET_VAL": "container"
+    },
+    {
+      "KEY_OF": null
+    },
+    {
+      "LET_VAL": "T"
+    },
+    {
+      "RESET_STACK": null
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 566
+      }
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": null
+      }
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 570
+      }
+    },
+    {
+      "GET_VAL": "n"
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 575
+      }
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 575
+      }
+    },
+    {
+      "GET_VAL": "len"
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 575
+      }
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 579
+      }
+    },
+    {
+      "GET_VAL": "T"
+    },
+    {
+      "BUILD_TUPLE": 1
+    },
+    {
+      "CALL_LAMBDA": null
+    },
+    {
+      "BINARAY_OP": "<="
+    },
+    {
+      "JUMP_IF_FALSE": 27
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 583
+      }
+    },
+    {
+      "NEW_FRAME": null
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 593
+      }
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 593
+      }
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": null
+      }
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 600
+      }
+    },
+    {
+      "GET_VAL": "E"
+    },
+    {
+      "DEREF_VAL": null
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 605
+      }
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 605
+      }
+    },
+    {
+      "GET_VAL": "T"
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": null
+      }
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 607
+      }
+    },
+    {
+      "GET_VAL": "n"
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 611
+      }
+    },
+    {
+      "LOAD_INT": 1
+    },
+    {
+      "BINARAY_OP": "-"
+    },
+    {
+      "INDEX_OF": null
+    },
+    {
+      "SET_VAL": null
+    },
+    {
+      "RESET_STACK": null
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 623
+      }
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 630
+      }
+    },
+    {
+      "LOAD_BOOL": true
+    },
+    {
+      "RETURN": null
+    },
+    {
+      "RESET_STACK": null
+    },
+    {
+      "POP_FRAME": null
+    },
+    {
+      "JUMP_OFFSET": 9
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 647
+      }
+    },
+    {
+      "NEW_FRAME": null
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 657
+      }
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 657
+      }
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 664
+      }
+    },
+    {
+      "LOAD_BOOL": false
+    },
+    {
+      "RETURN": null
+    },
+    {
+      "RESET_STACK": null
+    },
+    {
+      "POP_FRAME": null
+    },
+    {
+      "RESET_STACK": null
+    },
+    {
+      "POP_FRAME": null
+    },
+    {
+      "RETURN_NONE": null
+    }
+  ],
+  "__main__": [
+    {
+      "DEBUG_INFO": {
+        "code_position": 0
+      }
+    },
+    {
+      "NEW_FRAME": null
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 0
+      }
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 0
+      }
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 11
+      }
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 12
+      }
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 12
+      }
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 12
+      }
+    },
+    {
+      "LOAD_STRING": "str"
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 19
+      }
+    },
+    {
+      "LOAD_STRING": ""
+    },
+    {
+      "BUILD_NAMED": null
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 23
+      }
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 23
+      }
+    },
+    {
+      "LOAD_STRING": "n"
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 28
+      }
+    },
+    {
+      "LOAD_INT": 0
+    },
+    {
+      "BUILD_NAMED": null
+    },
+    {
+      "BUILD_TUPLE": 2
+    },
+    {
+      "LOAD_LAMBDA": [
+        "__MAIN__::__function_1__",
+        11
+      ]
+    },
+    {
+      "LET_VAL": "mutistr"
+    },
+    {
+      "RESET_STACK": null
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 156
+      }
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 156
+      }
+    },
+    {
+      "GET_VAL": "print"
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 156
+      }
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 162
+      }
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 162
+      }
+    },
+    {
+      "GET_VAL": "mutistr"
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 170
+      }
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 170
+      }
+    },
+    {
+      "LOAD_STRING": "a"
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 175
+      }
+    },
+    {
+      "LOAD_INT": 5
+    },
+    {
+      "BUILD_TUPLE": 2
+    },
+    {
+      "CALL_LAMBDA": null
+    },
+    {
+      "BUILD_TUPLE": 1
+    },
+    {
+      "CALL_LAMBDA": null
+    },
+    {
+      "RESET_STACK": null
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 195
+      }
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 203
+      }
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": null
+      }
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 204
+      }
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 204
+      }
+    },
+    {
+      "LOAD_STRING": "func"
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 212
+      }
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": null
+      }
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 213
+      }
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 213
+      }
+    },
+    {
+      "LOAD_STRING": "n"
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 218
+      }
+    },
+    {
+      "LOAD_INT": 0
+    },
+    {
+      "BUILD_NAMED": null
+    },
+    {
+      "BUILD_TUPLE": 1
+    },
+    {
+      "LOAD_LAMBDA": [
+        "__MAIN__::__function_2__",
+        212
+      ]
+    },
+    {
+      "BUILD_NAMED": null
+    },
+    {
+      "BUILD_TUPLE": 1
+    },
+    {
+      "LOAD_LAMBDA": [
+        "__MAIN__::__function_3__",
+        203
+      ]
+    },
+    {
+      "LET_VAL": "loop"
+    },
+    {
+      "RESET_STACK": null
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 361
+      }
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 374
+      }
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 374
+      }
+    },
+    {
+      "GET_VAL": "loop"
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 374
+      }
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 379
+      }
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": null
+      }
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 380
+      }
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 380
+      }
+    },
+    {
+      "LOAD_STRING": "n"
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 385
+      }
+    },
+    {
+      "LOAD_INT": 0
+    },
+    {
+      "BUILD_NAMED": null
+    },
+    {
+      "BUILD_TUPLE": 1
+    },
+    {
+      "LOAD_LAMBDA": [
+        "__MAIN__::__function_4__",
+        379
+      ]
+    },
+    {
+      "BUILD_TUPLE": 1
+    },
+    {
+      "CALL_LAMBDA": null
+    },
+    {
+      "LET_VAL": "loop_func"
+    },
+    {
+      "RESET_STACK": null
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 430
+      }
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 430
+      }
+    },
+    {
+      "GET_VAL": "loop_func"
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 439
+      }
+    },
+    {
+      "BUILD_TUPLE": 0
+    },
+    {
+      "CALL_LAMBDA": null
+    },
+    {
+      "RESET_STACK": null
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 444
+      }
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 452
+      }
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 453
+      }
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 453
+      }
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 453
+      }
+    },
+    {
+      "LOAD_STRING": "container"
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 467
+      }
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 467
+      }
+    },
+    {
+      "LOAD_STRING": "T"
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 473
+      }
+    },
+    {
+      "LOAD_NONE": null
+    },
+    {
+      "BUILD_KEY_VAL": null
+    },
+    {
+      "BUILD_NAMED": null
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 480
+      }
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 480
+      }
+    },
+    {
+      "LOAD_STRING": "n"
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 485
+      }
+    },
+    {
+      "LOAD_INT": 0
+    },
+    {
+      "BUILD_NAMED": null
+    },
+    {
+      "BUILD_TUPLE": 2
+    },
+    {
+      "LOAD_LAMBDA": [
+        "__MAIN__::__function_5__",
+        452
+      ]
+    },
+    {
+      "LET_VAL": "iter"
+    },
+    {
+      "RESET_STACK": null
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 682
+      }
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 689
+      }
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 689
+      }
+    },
+    {
+      "GET_VAL": "range"
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 695
+      }
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 695
+      }
+    },
+    {
+      "LOAD_INT": 0
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 698
+      }
+    },
+    {
+      "LOAD_INT": 100
+    },
+    {
+      "BUILD_TUPLE": 2
+    },
+    {
+      "CALL_LAMBDA": null
+    },
+    {
+      "LET_VAL": "arr"
+    },
+    {
+      "RESET_STACK": null
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 704
+      }
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 712
+      }
+    },
+    {
+      "LOAD_INT": 0
+    },
+    {
+      "LET_VAL": "elem"
+    },
+    {
+      "RESET_STACK": null
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 715
+      }
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 722
+      }
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 722
+      }
+    },
+    {
+      "GET_VAL": "iter"
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 722
+      }
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 727
+      }
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 727
+      }
+    },
+    {
+      "GET_VAL": "arr"
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": null
+      }
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 736
+      }
+    },
+    {
+      "GET_VAL": "elem"
+    },
+    {
+      "REF_VAL": null
+    },
+    {
+      "BUILD_KEY_VAL": null
+    },
+    {
+      "BUILD_TUPLE": 1
+    },
+    {
+      "CALL_LAMBDA": null
+    },
+    {
+      "JUMP_IF_FALSE": 14
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 743
+      }
+    },
+    {
+      "NEW_FRAME": null
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 749
+      }
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 749
+      }
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 749
+      }
+    },
+    {
+      "GET_VAL": "print"
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 749
+      }
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 755
+      }
+    },
+    {
+      "GET_VAL": "elem"
+    },
+    {
+      "BUILD_TUPLE": 1
+    },
+    {
+      "CALL_LAMBDA": null
+    },
+    {
+      "RESET_STACK": null
+    },
+    {
+      "POP_FRAME": null
+    },
+    {
+      "JUMP_OFFSET": -29
+    },
+    {
+      "RESET_STACK": null
+    },
+    {
+      "POP_FRAME": null
+    }
+  ]
+}

@@ -2,11 +2,20 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Debug lang.__test__",
+            "name": "Debug xlang.__test__",
             "type": "debugpy",
             "request": "launch",
-            "module": "lang.__test__",
+            "module": "xlang.__test__",
             "console": "internalConsole",
+            "justMyCode": false,
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "name": "Debug xlang.__main__",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "xlang.__main__",
+            "console": "integratedTerminal",
             "justMyCode": false,
             "cwd": "${workspaceFolder}"
         }
