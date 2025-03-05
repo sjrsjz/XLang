@@ -6,12 +6,15 @@
       }
     },
     {
-      "NEW_FRAME": null
+      "RESET_STACK": null
     },
     {
       "DEBUG_INFO": {
         "code_position": 97
       }
+    },
+    {
+      "RESET_STACK": null
     },
     {
       "DEBUG_INFO": {
@@ -164,7 +167,7 @@
       "BINARAY_OP": "<="
     },
     {
-      "JUMP_IF_FALSE": 27
+      "REDIRECT_JUMP_IF_FALSE": "__MAIN__::__function_1__::__label_1__"
     },
     {
       "DEBUG_INFO": {
@@ -178,6 +181,9 @@
       "DEBUG_INFO": {
         "code_position": 225
       }
+    },
+    {
+      "RESET_STACK": null
     },
     {
       "DEBUG_INFO": {
@@ -266,10 +272,16 @@
       "RESET_STACK": null
     },
     {
+      "LOAD_NONE": null
+    },
+    {
       "POP_FRAME": null
     },
     {
-      "JUMP_OFFSET": 9
+      "REDIRECT_JUMP": "__MAIN__::__function_1__::__label_2__"
+    },
+    {
+      "REDIRECT_LABEL": "__MAIN__::__function_1__::__label_1__"
     },
     {
       "DEBUG_INFO": {
@@ -283,6 +295,9 @@
       "DEBUG_INFO": {
         "code_position": 313
       }
+    },
+    {
+      "RESET_STACK": null
     },
     {
       "DEBUG_INFO": {
@@ -304,13 +319,19 @@
       "RESET_STACK": null
     },
     {
+      "LOAD_NONE": null
+    },
+    {
       "POP_FRAME": null
+    },
+    {
+      "REDIRECT_LABEL": "__MAIN__::__function_1__::__label_2__"
     },
     {
       "RESET_STACK": null
     },
     {
-      "POP_FRAME": null
+      "LOAD_NONE": null
     },
     {
       "RETURN_NONE": null
@@ -323,7 +344,7 @@
       }
     },
     {
-      "NEW_FRAME": null
+      "RESET_STACK": null
     },
     {
       "DEBUG_INFO": {
@@ -342,9 +363,6 @@
       "RETURN": null
     },
     {
-      "POP_FRAME": null
-    },
-    {
       "RETURN_NONE": null
     }
   ],
@@ -355,7 +373,7 @@
       }
     },
     {
-      "NEW_FRAME": null
+      "RESET_STACK": null
     },
     {
       "DEBUG_INFO": {
@@ -363,9 +381,15 @@
       }
     },
     {
+      "RESET_STACK": null
+    },
+    {
       "DEBUG_INFO": {
         "code_position": 474
       }
+    },
+    {
+      "REDIRECT_LABEL": "__MAIN__::__function_3__::__function_1__::__label_1__"
     },
     {
       "DEBUG_INFO": {
@@ -400,7 +424,7 @@
       "CALL_LAMBDA": null
     },
     {
-      "JUMP_IF_FALSE": 16
+      "REDIRECT_JUMP_IF_FALSE": "__MAIN__::__function_3__::__function_1__::__label_2__"
     },
     {
       "DEBUG_INFO": {
@@ -414,6 +438,9 @@
       "DEBUG_INFO": {
         "code_position": 512
       }
+    },
+    {
+      "RESET_STACK": null
     },
     {
       "DEBUG_INFO": {
@@ -459,16 +486,22 @@
       "RESET_STACK": null
     },
     {
+      "LOAD_NONE": null
+    },
+    {
       "POP_FRAME": null
     },
     {
-      "JUMP_OFFSET": -25
+      "REDIRECT_JUMP": "__MAIN__::__function_3__::__function_1__::__label_1__"
+    },
+    {
+      "REDIRECT_LABEL": "__MAIN__::__function_3__::__function_1__::__label_2__"
     },
     {
       "RESET_STACK": null
     },
     {
-      "POP_FRAME": null
+      "LOAD_NONE": null
     },
     {
       "RETURN_NONE": null
@@ -481,12 +514,15 @@
       }
     },
     {
-      "NEW_FRAME": null
+      "RESET_STACK": null
     },
     {
       "DEBUG_INFO": {
         "code_position": 423
       }
+    },
+    {
+      "RESET_STACK": null
     },
     {
       "DEBUG_INFO": {
@@ -567,7 +603,7 @@
       "RESET_STACK": null
     },
     {
-      "POP_FRAME": null
+      "LOAD_NONE": null
     },
     {
       "RETURN_NONE": null
@@ -580,14 +616,15 @@
       }
     },
     {
-      "DEBUG_INFO": {
-        "code_position": 5
-      }
+      "RESET_STACK": null
     },
     {
       "DEBUG_INFO": {
         "code_position": 5
       }
+    },
+    {
+      "RESET_STACK": null
     },
     {
       "DEBUG_INFO": {
@@ -596,11 +633,6 @@
     },
     {
       "GET_VAL": "print"
-    },
-    {
-      "DEBUG_INFO": {
-        "code_position": 5
-      }
     },
     {
       "DEBUG_INFO": {
@@ -621,21 +653,6 @@
     },
     {
       "DEBUG_INFO": {
-        "code_position": 19
-      }
-    },
-    {
-      "DEBUG_INFO": {
-        "code_position": 36
-      }
-    },
-    {
-      "DEBUG_INFO": {
-        "code_position": 36
-      }
-    },
-    {
-      "DEBUG_INFO": {
         "code_position": 36
       }
     },
@@ -644,31 +661,11 @@
     },
     {
       "DEBUG_INFO": {
-        "code_position": 44
-      }
-    },
-    {
-      "DEBUG_INFO": {
-        "code_position": 45
-      }
-    },
-    {
-      "DEBUG_INFO": {
-        "code_position": 45
-      }
-    },
-    {
-      "DEBUG_INFO": {
         "code_position": 45
       }
     },
     {
       "LOAD_STRING": "container"
-    },
-    {
-      "DEBUG_INFO": {
-        "code_position": 59
-      }
     },
     {
       "DEBUG_INFO": {
@@ -691,11 +688,6 @@
     },
     {
       "BUILD_NAMED": null
-    },
-    {
-      "DEBUG_INFO": {
-        "code_position": 72
-      }
     },
     {
       "DEBUG_INFO": {
@@ -734,27 +726,7 @@
       }
     },
     {
-      "DEBUG_INFO": {
-        "code_position": 361
-      }
-    },
-    {
       "LOAD_STRING": "loop"
-    },
-    {
-      "DEBUG_INFO": {
-        "code_position": 369
-      }
-    },
-    {
-      "DEBUG_INFO": {
-        "code_position": null
-      }
-    },
-    {
-      "DEBUG_INFO": {
-        "code_position": 370
-      }
     },
     {
       "DEBUG_INFO": {
@@ -763,21 +735,6 @@
     },
     {
       "LOAD_STRING": "func"
-    },
-    {
-      "DEBUG_INFO": {
-        "code_position": 378
-      }
-    },
-    {
-      "DEBUG_INFO": {
-        "code_position": null
-      }
-    },
-    {
-      "DEBUG_INFO": {
-        "code_position": 379
-      }
     },
     {
       "DEBUG_INFO": {
@@ -830,6 +787,9 @@
     },
     {
       "RESET_STACK": null
+    },
+    {
+      "LOAD_NONE": null
     },
     {
       "RETURN_NONE": null

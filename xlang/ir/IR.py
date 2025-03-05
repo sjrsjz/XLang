@@ -49,7 +49,6 @@ class IRType(enum.Enum):
     NEW_FRAME = auto()  # 新建帧
     POP_FRAME = auto()  # 弹出帧
     JUMP_OFFSET = auto()  # 无条件跳转到特定位置
-    JUMP_TO = auto()  # 无条件跳转到特定位置
     JUMP_IF_FALSE = auto()  # 如果栈顶为真则跳转
     RESET_STACK = auto()  # 重置栈
     COPY_VAL = auto()  # 复制值
@@ -58,6 +57,10 @@ class IRType(enum.Enum):
     ASSERT = auto()  # 断言
     DEBUG_INFO = auto()  # 调试信息
     IMPORT = auto()  # 导入IR并执行
+
+    REDIRECT_JUMP = auto()  # 重定向跳转
+    REDIRECT_JUMP_IF_FALSE = auto()  # 重定向跳转
+    REDIRECT_LABEL = auto()  # 重定向标签
 
 
 class IR:
@@ -322,7 +325,7 @@ class IRExecutor:
     def __init__(self, origin_code=None, error_printer = print, output_printer=print, input_reader=input, should_stop_func=None):
         self.stack = []
         self.context = Context()
-        self.ip = []  # 指令指针
+        self.ip = 0  # 指令指针
         self.instructions = [] # 使用列表存储多个ir，用于支持 import
         self.func_ips = []
         self.origin_code = origin_code
@@ -374,41 +377,31 @@ class IRExecutor:
         self.error_printer("```")
 
     def execute(self, functions, entry="__main__"):
+
+        lambda_ir, lambda_ir_table = functions.build_instructions()
+        self.instructions.append(lambda_ir)
+        self.func_ips.append(lambda_ir_table)
+        self.ip = self.func_ips[-1][entry]
+        self.stack.append((0, True))  # 保存当前ip和是否是新ir
+
         self.context.new_frame(
             self.stack, enter_func=True, funciton_code_position=0, hidden=True
         )
         create_builtins(self.context, self.output_printer, self.input_reader)
 
-        lambda_ir, lambda_ir_table = functions.build_instructions()
-        self.instructions.append(lambda_ir)
-        self.func_ips.append(lambda_ir_table)
-        self.ip.append(self.func_ips[-1][entry])
-        self.stack.append((0, True))  # 保存当前ip和是否是新ir
+        result = NoneType()
+
         try:
-            while len(self.ip) > 0:
-                while self.ip[-1] < len(self.instructions[-1]):
-                    instr = self.instructions[-1][self.ip[-1]]
-                    self.execute_instruction(instr)
-                    self.ip[-1] += 1
-                    if self.check_should_stop is not None and self.check_should_stop():
-                        raise ValueError("Cancelled due to should_stop_func")
-                # 先重置栈
-                if self.context.stack_pointers[-1] + 1 < len(self.stack):
-                    result = self.stack[-1].object_ref() # 保存结果
-                else:
-                    result = NoneType()
-                del self.stack[self.context.stack_pointers[-1] + 1 :]
-                last_ip = self.stack.pop()
-                if last_ip[1]:
-                    self.ip.pop()
-                    self.instructions.pop() # 删除指令表
-                    self.func_ips.pop() # 删除函数表
-
-
+            while len(self.instructions) > 0 and self.ip < len(self.instructions[-1]):
+                instr = self.instructions[-1][self.ip]
+                self.execute_instruction(instr)
+                self.ip += 1
+                if self.check_should_stop is not None and self.check_should_stop():
+                    raise ValueError("Cancelled due to should_stop_func")
+            result = self.stack.pop().object_ref()
         except Exception as e:
-            traceback.print_exc()
             self.error_printer(f"# Error: {e}\n")
-            self.error_printer(f"# ip: {self.ip[-1]}, ir: {instr}\n")
+            self.error_printer(f"# ip: {self.ip}, ir: {instr}\n")
 
             if self.origin_code is not None and self.debug_info is not None:
                 self.print_debug_info()
@@ -429,7 +422,6 @@ class IRExecutor:
             self.error_printer("```")
             raise e
         finally:
-            self.context.pop_frame(self.stack, exit_func=True)
             return result
 
     def execute_with_provided_context(self, functions, entry="__main__", context=None, stack=None):
@@ -438,35 +430,23 @@ class IRExecutor:
         lambda_ir, lambda_ir_table = functions.build_instructions()
         self.instructions.append(lambda_ir)
         self.func_ips.append(lambda_ir_table)
-        self.ip.append(self.func_ips[-1][entry])
+        self.ip = self.func_ips[-1][entry]
         self.stack.append((0, True))  # 保存当前ip和是否是新ir
 
         current_frame_size = self.context.sizeof()
+
         result = NoneType()
         try:
-            while len(self.ip) > 0:
-                while self.ip[-1] < len(self.instructions[-1]):
-                    instr = self.instructions[-1][self.ip[-1]]
-                    self.execute_instruction(instr)
-                    self.ip[-1] += 1
-                    if self.check_should_stop is not None and self.check_should_stop():
-                        raise ValueError("Cancelled due to should_stop_func")
-                # 先重置栈
-                if self.context.stack_pointers[-1] + 1 < len(self.stack):
-                    result = self.stack[-1].object_ref() # 保存结果
-                else:
-                    result = NoneType()
-                del self.stack[self.context.stack_pointers[-1] + 1 :]
-                last_ip = self.stack.pop()
-                if last_ip[1]:
-                    self.ip.pop()
-                    self.instructions.pop()
-                    self.func_ips.pop()
-                    
+            while len(self.instructions[-1]) > 0 and self.ip < len(self.instructions[-1]):
+                instr = self.instructions[-1][self.ip]
+                self.execute_instruction(instr)
+                self.ip += 1
+                if self.check_should_stop is not None and self.check_should_stop():
+                    raise ValueError("Cancelled due to should_stop_func")
+            result = self.stack.pop().object_ref()
         except Exception as e:
-            traceback.print_exc()
             self.error_printer(f"# Error: {e}\n")
-            self.error_printer(f"# ip: {self.ip[-1]}, ir: {instr}\n")
+            self.error_printer(f"# ip: {self.ip}, ir: {instr}\n")
 
             if self.origin_code is not None and self.debug_info is not None:
                 self.print_debug_info()
@@ -590,6 +570,7 @@ class IRExecutor:
         elif instr.ir_type == IRType.LET_VAL:
             value = self.stack.pop()
             self.context.let(instr.value, Variable(value.object_ref()))
+            self.stack.append(value)
 
         elif instr.ir_type == IRType.GET_VAL:
             self.stack.append(self.context.get(instr.value))
@@ -598,6 +579,7 @@ class IRExecutor:
             value = self.stack.pop()
             key = self.stack.pop()
             key.assgin(value.object_ref())
+            self.stack.append(value)
 
         elif instr.ir_type == IRType.CALL_LAMBDA:
             arg_tuple = self.stack.pop().object_ref()
@@ -614,7 +596,7 @@ class IRExecutor:
                     self.func_ips.append(func.lambda_ir_table)
                     not_local_ir = True
 
-                self.stack.append((self.ip[-1], not_local_ir))  # 保存当前ip和是否是外部ir
+                self.stack.append((self.ip, not_local_ir))  # 保存当前ip和是否是新ir
 
                 # 建立参数帧
                 self.context.new_frame(
@@ -640,27 +622,32 @@ class IRExecutor:
                     self.context.let("self", func.self_object)
 
                 ip = self.func_ips[-1][signature]  # 获取函数入口地址
-                self.ip[-1] = ip - 1  # -1是因为后面会+1
+                self.ip = ip - 1  # -1是因为后面会+1
             else:
                 raise ValueError(f"Object: {func} is not callable")
         elif instr.ir_type == IRType.RETURN:
             result = self.stack.pop()
-            self.context.pop_frame(self.stack, exit_func=True)
+            del self.stack[self.context.stack_pointers[-1]:]
             ip_info = self.stack.pop()
-            self.ip[-1] = ip_info[0]
+            self.ip = ip_info[0]
             if ip_info[1]:
                 self.instructions.pop() # 删除外部ir
                 self.func_ips.pop()
+            self.context.pop_frame(self.stack, exit_func=True)
+
             self.stack.append(result)
 
         elif instr.ir_type == IRType.RETURN_NONE:
+            result = self.stack.pop()
+            # 平栈
+            del self.stack[self.context.stack_pointers[-1]:]
             ip_info = self.stack.pop()
-            self.ip[-1] = ip_info[0]
+            self.ip = ip_info[0]
             if ip_info[1]:
                 self.instructions.pop()
                 self.func_ips.pop()
             self.context.pop_frame(self.stack, exit_func=True)
-            self.stack.append(NoneType())
+            self.stack.append(result)
 
         elif instr.ir_type == IRType.NEW_FRAME:
             # print("new frame")
@@ -671,17 +658,14 @@ class IRExecutor:
             self.context.pop_frame(self.stack)
 
         elif instr.ir_type == IRType.JUMP_OFFSET:
-            self.ip[-1] += instr.value
+            self.ip += instr.value
 
         elif instr.ir_type == IRType.JUMP_IF_FALSE:
             condition = self.stack.pop().object_ref()
             if not isinstance(condition, Bool):
                 raise ValueError(f"Condition is not bool: {condition}")
             if not condition.value:
-                self.ip[-1] += instr.value
-
-        elif instr.ir_type == IRType.JUMP_TO:
-            self.ip[-1] = instr.value
+                self.ip += instr.value
 
         elif instr.ir_type == IRType.GET_ATTR:
             attr_name = self.stack.pop().object_ref()
@@ -694,7 +678,7 @@ class IRExecutor:
             self.stack.append(IndexOf(obj, index))
 
         elif instr.ir_type == IRType.RESET_STACK:
-            del self.stack[self.context.stack_pointers[-1] + 1 :]
+            del self.stack[self.context.stack_pointers[-1]:]
 
         elif instr.ir_type == IRType.COPY_VAL:
             self.stack.append(self.stack.pop().object_ref().copy())
@@ -731,6 +715,7 @@ class IRExecutor:
                 raise ValueError(f"Assert value is not Bool: {value}")
             if not value.value:
                 raise ValueError(f"Assert failed")
+            self.stack.append(NoneType())
 
         elif instr.ir_type == IRType.SELF_OF:
             value = self.stack.pop().object_ref()

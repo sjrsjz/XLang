@@ -199,6 +199,8 @@ class XLangASTNodeTypes(enum.Enum):
     WHILE = auto()
     MODIFY = auto()
     NAMED_ARGUMENT = auto()
+    BREAK = auto()
+    CONTINUE = auto()
 
 
 class XLangASTNode:
@@ -628,6 +630,41 @@ class XLangIF:
             ),
             3,
         )
+
+
+@node_matcher.register(priority=19) 
+class XLangControlFlow:
+    """匹配break和continue"""
+
+    def __init__(self, token_list):
+        self.token_list = token_list
+
+    def match(self, start_idx):
+        if start_idx >= len(self.token_list):
+            return None, 0
+
+        # 检查是否为break关键字
+        if _is_identifier(self.token_list[start_idx], "break"):
+            return (
+                XLangASTNode(
+                    XLangASTNodeTypes.BREAK,
+                    None,  # break不需要子节点
+                    self.token_list[start_idx][0]["position"],
+                ),
+                1,  # 只消耗一个token
+            )
+        # 检查是否为continue关键字
+        if _is_identifier(self.token_list[start_idx], "continue"):
+            return (
+                XLangASTNode(
+                    XLangASTNodeTypes.CONTINUE,
+                    None,  # continue不需要子节点
+                    self.token_list[start_idx][0]["position"],
+                ),
+                1,  # 只消耗一个token
+            )
+
+        return None, 0
 
 
 @node_matcher.register(priority=12)
@@ -1194,8 +1231,14 @@ class XLangASTParser:
         return ret
 
     def parse_body(self, start_idx=0) -> XLangASTNode:
+        if len(self.token_list) == 0:
+            return XLangASTNode(
+                XLangASTNodeTypes.SEPARATOR,  # 用于表示没有body的情况，仅仅是一组表达式
+                [XLangASTNode(XLangASTNodeTypes.NULL, None, 0)],
+                0,
+            )
         return XLangASTNode(
-            XLangASTNodeTypes.BODY,
+            XLangASTNodeTypes.SEPARATOR,
             self.parse(),
             self.token_list[start_idx][0]["position"],
         )
@@ -1203,7 +1246,7 @@ class XLangASTParser:
         if len(self.token_list) == 0:
             return XLangASTNode(
                 XLangASTNodeTypes.SEPARATOR, # 用于表示没有body的情况，仅仅是一组表达式
-                [],
+                [XLangASTNode(XLangASTNodeTypes.NULL, None, 0)],
                 0,
             )
         return XLangASTNode(

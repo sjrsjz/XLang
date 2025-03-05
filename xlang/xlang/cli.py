@@ -8,7 +8,7 @@ import traceback
 import atexit  # 用于保存历史记录
 from xlang.xlang.lang import XLang
 from xlang.ir.context import Context
-from xlang.ir.IR import IRExecutor
+from xlang.ir.variable import Int, Float, Bool, String, NoneType, Tuple, KeyValue
 
 # 引入prompt_toolkit相关模块
 from prompt_toolkit import PromptSession
@@ -42,10 +42,6 @@ XLANG_KEYWORDS = [
     "copy",
     "ref",
     "deref",
-    "print",
-    "input",
-    "len",
-    "range",
 ]
 
 
@@ -60,33 +56,48 @@ class XLangCompleter(Completer):
         """更新上下文以获取最新的变量和函数名"""
         self.context = context
 
+
     def get_context_items(self):
-        """从上下文中获取变量和函数名"""
-        if not self.context:
+        """从上下文中获取变量和函数名以及它们的说明"""
+        if not self.context or not self.context.frames:
             return []
 
-        items = []
-        try:
-            # 从当前帧和符号表中提取变量名
-            current_frame = self.context.frames[-1] if self.context.frames else None
-            if current_frame and hasattr(current_frame, "symbol_table"):
-                items.extend(current_frame.symbol_table.keys())
-        except (AttributeError, IndexError):
-            pass
+        items = {}  # 使用字典存储变量名和对应的说明
+
+        # 从所有帧中收集变量名及其值
+        for frame, is_func, _, hidden in self.context.frames:
+            if not hidden and isinstance(frame, dict):
+                for var_name, var_value in frame.items():
+                    # 只添加新变量或更新较新帧中的变量
+                    if var_name not in items:
+                        description = self._get_description(var_value)
+                        items[var_name] = description
 
         return items
+
+
+    def _get_description(self, value):
+        """根据变量值生成说明文本"""
+        return f"{type(value).__name__}: {value}"
 
     def get_completions(self, document, complete_event):
         """prompt_toolkit补全函数"""
         word = document.get_word_before_cursor()
 
-        # 获取上下文变量和函数
+        # 获取上下文变量和其说明
         context_items = self.get_context_items()
-        all_candidates = self.keywords + context_items
 
-        for candidate in all_candidates:
-            if candidate.startswith(word):
-                yield Completion(candidate, start_position=-len(word))
+        # 先处理关键字
+        for keyword in self.keywords:
+            if keyword.startswith(word):
+                yield Completion(keyword, start_position=-len(word), display_meta="keyword")
+
+        # 然后处理上下文中的变量
+        for var_name, description in context_items.items():
+            if var_name.startswith(word):
+                yield Completion(
+                    var_name, start_position=-len(word), display_meta=description
+            )
 
 
 def setup_prompt_toolkit():
@@ -305,7 +316,7 @@ def main():
                     completer.update_context(context)
 
                     # 显示结果
-                    if result is not None:
+                    if not isinstance(result, NoneType):
                         print(result)
 
                     if args.time:

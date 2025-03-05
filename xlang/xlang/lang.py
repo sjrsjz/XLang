@@ -25,7 +25,19 @@ class XLang:
             return [self.x_to_python(v) for v in x_value.values]
         elif isinstance(x_value, Variable):
             return self.x_to_python(x_value.value)
-        return None
+        elif isinstance(x_value, KeyValue):
+            return {self.x_to_python(x_value.key): self.x_to_python(x_value.value)}
+        elif isinstance(x_value, Lambda):
+            return f"Lambda({x_value.signature}, {self.x_to_python(x_value.default_args_tuple)})"
+        elif isinstance(x_value, Named):
+            return f"{self.x_to_python(x_value.key)} => {self.x_to_python(x_value.value)}"
+        elif isinstance(x_value, Ref):
+            return f"&{self.x_to_python(x_value.value)}"
+        elif isinstance(x_value, GetAttr):
+            return f"{self.x_to_python(x_value.value)}.{self.x_to_python(x_value.key)}"
+        elif isinstance(x_value, IndexOf):
+            return f"{self.x_to_python(x_value.value)}[{self.x_to_python(x_value.key)}]"
+        raise TypeError(f"Cant convert X type: {type(x_value)}")
 
     def python_to_x(self, py_value):
         """将Python值转换为X语言值"""
@@ -84,20 +96,18 @@ class XLang:
             executor_args[k] = self.python_to_x(v)
         result = executor.execute_with_let(functions, entry, executor_args)
         return self.x_to_python(result)
-    
+
     def execute_with_context(self, code, context, stack, entry="__main__"):
         """使用给定的上下文和堆栈执行X语言代码"""
         ast = build_ast(code)
         functions = Functions()
         generator = IRGenerator(functions=functions)
         IRs = generator.generate(ast)
-        IRs.append(IR(IRType.RETURN_NONE))
         functions.add("__main__", IRs)
-        print(functions)
         executor = IRExecutor(code)
         result = executor.execute_with_provided_context(functions, entry, context, stack)
-        return self.x_to_python(result)
-    
+        return result
+
     def create_builtins_for_context(self, context, output_printer=print, input_reader=input):
         create_builtins(context, output_printer, input_reader)
 
