@@ -7,8 +7,8 @@ with open("readme.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
 setup(
-    name="xlang",
-    version="0.1.0",
+    name="xlang-script",
+    version="0.1.0-3",
     author="sjrsjz@github",
     author_email="sjrsjz@gmail.com",
     description="XLang - Lightweight programming language",

@@ -97,14 +97,24 @@ class XLang:
         result = executor.execute_with_let(functions, entry, executor_args)
         return self.x_to_python(result)
 
-    def execute_with_context(self, code, context, stack, entry="__main__"):
+    def execute_with_context(
+        self,
+        code,
+        context,
+        stack,
+        entry="__main__",
+        error_printer=print,
+        output_printer=print,
+        input_reader=input,
+        should_stop_func=None,
+    ):
         """使用给定的上下文和堆栈执行X语言代码"""
         ast = build_ast(code)
         functions = Functions()
         generator = IRGenerator(functions=functions)
         IRs = generator.generate(ast)
         functions.add("__main__", IRs)
-        executor = IRExecutor(code)
+        executor = IRExecutor(code, error_printer, output_printer, input_reader, should_stop_func)
         result = executor.execute_with_provided_context(functions, entry, context, stack)
         return result
 
