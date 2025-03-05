@@ -1200,6 +1200,12 @@ class XLangASTParser:
             self.token_list[start_idx][0]["position"],
         )
     def parse_without_body(self, start_idx=0) -> XLangASTNode:
+        if len(self.token_list) == 0:
+            return XLangASTNode(
+                XLangASTNodeTypes.SEPARATOR, # 用于表示没有body的情况，仅仅是一组表达式
+                [],
+                0,
+            )
         return XLangASTNode(
             XLangASTNodeTypes.SEPARATOR, # 用于表示没有body的情况，仅仅是一组表达式
             self.parse(),

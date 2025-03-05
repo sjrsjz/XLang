@@ -64,7 +64,6 @@ class XLang:
         self,
         code,
         entry="__main__",
-        export_varible_name="__export__",
         error_printer=print,
         output_printer=print,
         input_reader=input,
@@ -81,7 +80,7 @@ class XLang:
         executor_args = {}
         for k, v in kwargs.items():
             executor_args[k] = self.python_to_x(v)
-        result = executor.execute_with_let(entry, executor_args, export_varible_name)
+        result = executor.execute_with_let(entry, executor_args)
         return self.x_to_python(result)
     
     def execute_with_context(self, code, context, stack, entry="__main__"):

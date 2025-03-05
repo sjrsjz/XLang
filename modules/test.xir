@@ -2,7 +2,7 @@
   "__MAIN__::__function_1__": [
     {
       "DEBUG_INFO": {
-        "code_position": 89
+        "code_position": 97
       }
     },
     {
@@ -10,17 +10,17 @@
     },
     {
       "DEBUG_INFO": {
-        "code_position": 89
+        "code_position": 97
       }
     },
     {
       "DEBUG_INFO": {
-        "code_position": 89
+        "code_position": 97
       }
     },
     {
       "DEBUG_INFO": {
-        "code_position": 89
+        "code_position": 97
       }
     },
     {
@@ -33,7 +33,7 @@
     },
     {
       "DEBUG_INFO": {
-        "code_position": 93
+        "code_position": 101
       }
     },
     {
@@ -41,7 +41,7 @@
     },
     {
       "DEBUG_INFO": {
-        "code_position": 97
+        "code_position": 105
       }
     },
     {
@@ -58,7 +58,7 @@
     },
     {
       "DEBUG_INFO": {
-        "code_position": 112
+        "code_position": 120
       }
     },
     {
@@ -68,7 +68,7 @@
     },
     {
       "DEBUG_INFO": {
-        "code_position": 125
+        "code_position": 133
       }
     },
     {
@@ -85,7 +85,7 @@
     },
     {
       "DEBUG_INFO": {
-        "code_position": 148
+        "code_position": 156
       }
     },
     {
@@ -95,7 +95,7 @@
     },
     {
       "DEBUG_INFO": {
-        "code_position": 159
+        "code_position": 167
       }
     },
     {
@@ -112,7 +112,7 @@
     },
     {
       "DEBUG_INFO": {
-        "code_position": 182
+        "code_position": 190
       }
     },
     {
@@ -122,7 +122,7 @@
     },
     {
       "DEBUG_INFO": {
-        "code_position": 186
+        "code_position": 194
       }
     },
     {
@@ -130,12 +130,12 @@
     },
     {
       "DEBUG_INFO": {
-        "code_position": 191
+        "code_position": 199
       }
     },
     {
       "DEBUG_INFO": {
-        "code_position": 191
+        "code_position": 199
       }
     },
     {
@@ -143,12 +143,12 @@
     },
     {
       "DEBUG_INFO": {
-        "code_position": 191
+        "code_position": 199
       }
     },
     {
       "DEBUG_INFO": {
-        "code_position": 195
+        "code_position": 203
       }
     },
     {
@@ -168,7 +168,7 @@
     },
     {
       "DEBUG_INFO": {
-        "code_position": 199
+        "code_position": 207
       }
     },
     {
@@ -176,12 +176,12 @@
     },
     {
       "DEBUG_INFO": {
-        "code_position": 217
+        "code_position": 225
       }
     },
     {
       "DEBUG_INFO": {
-        "code_position": 217
+        "code_position": 225
       }
     },
     {
@@ -191,7 +191,7 @@
     },
     {
       "DEBUG_INFO": {
-        "code_position": 224
+        "code_position": 232
       }
     },
     {
@@ -202,12 +202,12 @@
     },
     {
       "DEBUG_INFO": {
-        "code_position": 229
+        "code_position": 237
       }
     },
     {
       "DEBUG_INFO": {
-        "code_position": 229
+        "code_position": 237
       }
     },
     {
@@ -220,7 +220,7 @@
     },
     {
       "DEBUG_INFO": {
-        "code_position": 231
+        "code_position": 239
       }
     },
     {
@@ -228,7 +228,7 @@
     },
     {
       "DEBUG_INFO": {
-        "code_position": 235
+        "code_position": 243
       }
     },
     {
@@ -248,12 +248,12 @@
     },
     {
       "DEBUG_INFO": {
-        "code_position": 255
+        "code_position": 263
       }
     },
     {
       "DEBUG_INFO": {
-        "code_position": 262
+        "code_position": 270
       }
     },
     {
@@ -273,7 +273,7 @@
     },
     {
       "DEBUG_INFO": {
-        "code_position": 287
+        "code_position": 295
       }
     },
     {
@@ -281,17 +281,17 @@
     },
     {
       "DEBUG_INFO": {
-        "code_position": 305
+        "code_position": 313
       }
     },
     {
       "DEBUG_INFO": {
-        "code_position": 305
+        "code_position": 313
       }
     },
     {
       "DEBUG_INFO": {
-        "code_position": 312
+        "code_position": 320
       }
     },
     {
@@ -319,7 +319,7 @@
   "__MAIN__::__function_2__": [
     {
       "DEBUG_INFO": {
-        "code_position": 383
+        "code_position": 391
       }
     },
     {
@@ -327,12 +327,12 @@
     },
     {
       "DEBUG_INFO": {
-        "code_position": 383
+        "code_position": 391
       }
     },
     {
       "DEBUG_INFO": {
-        "code_position": 390
+        "code_position": 398
       }
     },
     {
@@ -351,7 +351,7 @@
   "__MAIN__::__function_3__::__function_1__": [
     {
       "DEBUG_INFO": {
-        "code_position": 466
+        "code_position": 474
       }
     },
     {
@@ -359,22 +359,22 @@
     },
     {
       "DEBUG_INFO": {
-        "code_position": 466
+        "code_position": 474
       }
     },
     {
       "DEBUG_INFO": {
-        "code_position": 466
+        "code_position": 474
       }
     },
     {
       "DEBUG_INFO": {
-        "code_position": 473
+        "code_position": 481
       }
     },
     {
       "DEBUG_INFO": {
-        "code_position": 473
+        "code_position": 481
       }
     },
     {
@@ -382,12 +382,12 @@
     },
     {
       "DEBUG_INFO": {
-        "code_position": 473
+        "code_position": 481
       }
     },
     {
       "DEBUG_INFO": {
-        "code_position": 478
+        "code_position": 486
       }
     },
     {
@@ -404,7 +404,7 @@
     },
     {
       "DEBUG_INFO": {
-        "code_position": 482
+        "code_position": 490
       }
     },
     {
@@ -412,17 +412,17 @@
     },
     {
       "DEBUG_INFO": {
-        "code_position": 504
+        "code_position": 512
       }
     },
     {
       "DEBUG_INFO": {
-        "code_position": 504
+        "code_position": 512
       }
     },
     {
       "DEBUG_INFO": {
-        "code_position": 504
+        "code_position": 512
       }
     },
     {
@@ -435,7 +435,7 @@
     },
     {
       "DEBUG_INFO": {
-        "code_position": 508
+        "code_position": 516
       }
     },
     {
@@ -443,7 +443,7 @@
     },
     {
       "DEBUG_INFO": {
-        "code_position": 512
+        "code_position": 520
       }
     },
     {
@@ -477,7 +477,7 @@
   "__MAIN__::__function_3__": [
     {
       "DEBUG_INFO": {
-        "code_position": 415
+        "code_position": 423
       }
     },
     {
@@ -485,21 +485,6 @@
     },
     {
       "DEBUG_INFO": {
-        "code_position": 415
-      }
-    },
-    {
-      "DEBUG_INFO": {
-        "code_position": 415
-      }
-    },
-    {
-      "DEBUG_INFO": {
-        "code_position": 422
-      }
-    },
-    {
-      "DEBUG_INFO": {
         "code_position": 423
       }
     },
@@ -510,7 +495,22 @@
     },
     {
       "DEBUG_INFO": {
-        "code_position": 423
+        "code_position": 430
+      }
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 431
+      }
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 431
+      }
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 431
       }
     },
     {
@@ -518,7 +518,7 @@
     },
     {
       "DEBUG_INFO": {
-        "code_position": 428
+        "code_position": 436
       }
     },
     {
@@ -529,12 +529,12 @@
     },
     {
       "DEBUG_INFO": {
-        "code_position": 431
+        "code_position": 439
       }
     },
     {
       "DEBUG_INFO": {
-        "code_position": 431
+        "code_position": 439
       }
     },
     {
@@ -542,7 +542,7 @@
     },
     {
       "DEBUG_INFO": {
-        "code_position": 439
+        "code_position": 447
       }
     },
     {
@@ -557,7 +557,7 @@
     {
       "LOAD_LAMBDA": [
         "__MAIN__::__function_3__::__function_1__",
-        422
+        430
       ]
     },
     {
@@ -580,9 +580,6 @@
       }
     },
     {
-      "NEW_FRAME": null
-    },
-    {
       "DEBUG_INFO": {
         "code_position": 5
       }
@@ -598,25 +595,34 @@
       }
     },
     {
-      "GET_VAL": "__export__"
+      "GET_VAL": "print"
     },
     {
       "DEBUG_INFO": {
-        "code_position": 28
+        "code_position": 5
       }
     },
     {
       "DEBUG_INFO": {
-        "code_position": 28
+        "code_position": 11
       }
+    },
+    {
+      "GET_VAL": "A"
+    },
+    {
+      "BUILD_TUPLE": 1
+    },
+    {
+      "CALL_LAMBDA": null
+    },
+    {
+      "RESET_STACK": null
     },
     {
       "DEBUG_INFO": {
-        "code_position": 28
+        "code_position": 19
       }
-    },
-    {
-      "LOAD_STRING": "iter"
     },
     {
       "DEBUG_INFO": {
@@ -625,17 +631,35 @@
     },
     {
       "DEBUG_INFO": {
-        "code_position": 37
+        "code_position": 36
       }
     },
     {
       "DEBUG_INFO": {
-        "code_position": 37
+        "code_position": 36
+      }
+    },
+    {
+      "LOAD_STRING": "iter"
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 44
       }
     },
     {
       "DEBUG_INFO": {
-        "code_position": 37
+        "code_position": 45
+      }
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 45
+      }
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 45
       }
     },
     {
@@ -643,12 +667,12 @@
     },
     {
       "DEBUG_INFO": {
-        "code_position": 51
+        "code_position": 59
       }
     },
     {
       "DEBUG_INFO": {
-        "code_position": 51
+        "code_position": 59
       }
     },
     {
@@ -656,7 +680,7 @@
     },
     {
       "DEBUG_INFO": {
-        "code_position": 57
+        "code_position": 65
       }
     },
     {
@@ -670,12 +694,12 @@
     },
     {
       "DEBUG_INFO": {
-        "code_position": 64
+        "code_position": 72
       }
     },
     {
       "DEBUG_INFO": {
-        "code_position": 64
+        "code_position": 72
       }
     },
     {
@@ -683,7 +707,7 @@
     },
     {
       "DEBUG_INFO": {
-        "code_position": 69
+        "code_position": 77
       }
     },
     {
@@ -698,24 +722,11 @@
     {
       "LOAD_LAMBDA": [
         "__MAIN__::__function_1__",
-        36
+        44
       ]
     },
     {
       "BUILD_KEY_VAL": null
-    },
-    {
-      "DEBUG_INFO": {
-        "code_position": 353
-      }
-    },
-    {
-      "DEBUG_INFO": {
-        "code_position": 353
-      }
-    },
-    {
-      "LOAD_STRING": "loop"
     },
     {
       "DEBUG_INFO": {
@@ -724,21 +735,21 @@
     },
     {
       "DEBUG_INFO": {
+        "code_position": 361
+      }
+    },
+    {
+      "LOAD_STRING": "loop"
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 369
+      }
+    },
+    {
+      "DEBUG_INFO": {
         "code_position": null
       }
-    },
-    {
-      "DEBUG_INFO": {
-        "code_position": 362
-      }
-    },
-    {
-      "DEBUG_INFO": {
-        "code_position": 362
-      }
-    },
-    {
-      "LOAD_STRING": "func"
     },
     {
       "DEBUG_INFO": {
@@ -747,17 +758,30 @@
     },
     {
       "DEBUG_INFO": {
+        "code_position": 370
+      }
+    },
+    {
+      "LOAD_STRING": "func"
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 378
+      }
+    },
+    {
+      "DEBUG_INFO": {
         "code_position": null
       }
     },
     {
       "DEBUG_INFO": {
-        "code_position": 371
+        "code_position": 379
       }
     },
     {
       "DEBUG_INFO": {
-        "code_position": 371
+        "code_position": 379
       }
     },
     {
@@ -765,7 +789,7 @@
     },
     {
       "DEBUG_INFO": {
-        "code_position": 376
+        "code_position": 384
       }
     },
     {
@@ -780,7 +804,7 @@
     {
       "LOAD_LAMBDA": [
         "__MAIN__::__function_2__",
-        370
+        378
       ]
     },
     {
@@ -792,7 +816,7 @@
     {
       "LOAD_LAMBDA": [
         "__MAIN__::__function_3__",
-        361
+        369
       ]
     },
     {
@@ -802,13 +826,10 @@
       "BUILD_TUPLE": 2
     },
     {
-      "SET_VAL": null
+      "RETURN": null
     },
     {
       "RESET_STACK": null
-    },
-    {
-      "POP_FRAME": null
     }
   ]
 }

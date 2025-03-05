@@ -5,39 +5,66 @@ import argparse
 import json
 import time
 import traceback
-import readline  # 添加readline支持
-import atexit    # 用于保存历史记录
+import atexit  # 用于保存历史记录
 from xlang.xlang.lang import XLang
 from xlang.ir.context import Context
 from xlang.ir.IR import IRExecutor
 
+# 引入prompt_toolkit相关模块
+from prompt_toolkit import PromptSession
+from prompt_toolkit.history import FileHistory
+from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
+from prompt_toolkit.completion import Completer, Completion
+from prompt_toolkit.lexers import PygmentsLexer
+from prompt_toolkit.styles import Style
+from prompt_toolkit.formatted_text import HTML
 
 # XLang关键字列表 - 用于自动补全
 XLANG_KEYWORDS = [
-    'if', 'else', 'while', 'return',
-    'int', 'float', 'str', 'bool', 'null', 'true', 'false', 
-    'import', '__export__', 'self', 'keyof', 'valueof', 'typeof', 'selfof',
-    'assert', 'copy', 'ref', 'deref', 'print', 'input', 'len', 'range',
+    "if",
+    "else",
+    "while",
+    "return",
+    "int",
+    "float",
+    "str",
+    "bool",
+    "null",
+    "true",
+    "false",
+    "import",
+    "self",
+    "keyof",
+    "valueof",
+    "typeof",
+    "selfof",
+    "assert",
+    "copy",
+    "ref",
+    "deref",
+    "print",
+    "input",
+    "len",
+    "range",
 ]
 
 
-class XLangCompleter:
+class XLangCompleter(Completer):
     """XLang自动补全器"""
-    
+
     def __init__(self, context=None):
         self.context = context
         self.keywords = XLANG_KEYWORDS
-        self.matches = []
-        
+
     def update_context(self, context):
         """更新上下文以获取最新的变量和函数名"""
         self.context = context
-        
+
     def get_context_items(self):
         """从上下文中获取变量和函数名"""
         if not self.context:
             return []
-            
+
         items = []
         try:
             # 从当前帧和符号表中提取变量名
@@ -46,74 +73,68 @@ class XLangCompleter:
                 items.extend(current_frame.symbol_table.keys())
         except (AttributeError, IndexError):
             pass
-            
+
         return items
-        
-    def complete(self, text, state):
-        """readline补全函数"""
-        if state == 0:
-            # 第一次调用时创建匹配列表
-            context_items = self.get_context_items()
-            all_candidates = self.keywords + context_items
-            
-            if text:
-                self.matches = [word for word in all_candidates 
-                               if word.startswith(text)]
-            else:
-                self.matches = all_candidates[:]
-                
-        # 返回匹配列表中的第state个项
-        try:
-            return self.matches[state]
-        except IndexError:
-            return None
+
+    def get_completions(self, document, complete_event):
+        """prompt_toolkit补全函数"""
+        word = document.get_word_before_cursor()
+
+        # 获取上下文变量和函数
+        context_items = self.get_context_items()
+        all_candidates = self.keywords + context_items
+
+        for candidate in all_candidates:
+            if candidate.startswith(word):
+                yield Completion(candidate, start_position=-len(word))
 
 
-def setup_readline():
-    """配置readline"""
+def setup_prompt_toolkit():
+    """配置prompt_toolkit"""
     # 设置历史记录文件
     history_dir = os.path.expanduser("~/.xlang")
     os.makedirs(history_dir, exist_ok=True)
     history_file = os.path.join(history_dir, "history")
-    
-    try:
-        readline.read_history_file(history_file)
-        # 设置历史记录大小限制
-        readline.set_history_length(1000)
-    except FileNotFoundError:
-        pass
-    
-    # 确保退出时保存历史记录
-    atexit.register(readline.write_history_file, history_file)
-    
-    # 设置补全样式
-    readline.parse_and_bind("tab: complete")
-    
-    return history_file
+
+    style = Style.from_dict(
+        {
+            "prompt": "#00aa00 bold",
+            "continuation": "#aaaa00",
+        }
+    )
+
+    # 创建Session
+    session = PromptSession(
+        history=FileHistory(history_file),
+        auto_suggest=AutoSuggestFromHistory(),
+        style=style,
+    )
+
+    return session, history_file
 
 
-def multiline_input(prompt=">>> "):
-    """支持多行输入的函数"""
+def multiline_input(session, prompt=">>> ", continuation_prompt="... "):
+    """使用prompt_toolkit支持多行输入的函数"""
     lines = []
-    line = input(prompt)
+    line = session.prompt(HTML(f"<prompt>{prompt}</prompt>"))
     lines.append(line)
-    
+
     # 检查是否需要继续获取输入
     open_braces = line.count("{") - line.count("}")
     open_brackets = line.count("[") - line.count("]")
     open_parens = line.count("(") - line.count(")")
-    
-    continuation_prompt = "... "
-    
+
     # 如果有未闭合的括号或代码块，继续获取输入
     while open_braces > 0 or open_brackets > 0 or open_parens > 0:
-        line = input(continuation_prompt)
+        line = session.prompt(
+            HTML(f"<continuation>{continuation_prompt}</continuation>")
+        )
         lines.append(line)
-        
+
         open_braces += line.count("{") - line.count("}")
         open_brackets += line.count("[") - line.count("]")
         open_parens += line.count("(") - line.count(")")
-    
+
     return "\n".join(lines)
 
 
@@ -214,14 +235,14 @@ def main():
             sys.exit(1)
 
     elif args.interactive:
-        # Interactive mode with readline support
+        # Interactive mode with prompt_toolkit support
         print("X Lang Interactive Mode")
         print("Enter 'exit()' or press Ctrl+C to exit")
         print("Use arrow keys for history navigation, Tab for completion")
         print()
 
-        # 设置readline
-        history_file = setup_readline()
+        # 设置prompt_toolkit
+        session, history_file = setup_prompt_toolkit()
 
         # Create separate interpreter instance to maintain state
         context = Context()
@@ -229,27 +250,27 @@ def main():
         context.new_frame(stack=stack, enter_func=True)
         interpreter = XLang()
         interpreter.create_builtins_for_context(context)
-        
+
         # 设置自动补全
         completer = XLangCompleter(context)
-        readline.set_completer(completer.complete)
+        session.completer = completer
 
         while True:
             try:
                 # 检测多行输入
                 try:
                     # 获取用户输入，支持多行输入
-                    user_input = multiline_input(">>> ")
-                    
+                    user_input = multiline_input(session)
+
                     # 如果为空行，则继续
                     if not user_input.strip():
                         continue
-                        
+
                     # 检查退出命令
                     if user_input.strip() == "exit()":
                         context.pop_frame(stack, exit_func=True)
                         break
-                        
+
                     # 特殊命令处理
                     if user_input.strip() == "help()":
                         print("XLang Help:")
@@ -258,11 +279,11 @@ def main():
                         print("  clear() - Clear the screen")
                         print("  vars()  - List all variables in current scope")
                         continue
-                        
+
                     if user_input.strip() == "clear()":
-                        os.system('cls' if os.name == 'nt' else 'clear')
+                        os.system("cls" if os.name == "nt" else "clear")
                         continue
-                        
+
                     if user_input.strip() == "vars()":
                         # 显示当前作用域中的所有变量
                         current_frame = context.frames[-1]
@@ -276,7 +297,9 @@ def main():
 
                     # 执行代码
                     start_time = time.time()
-                    result = interpreter.execute_with_context(user_input, context, stack)
+                    result = interpreter.execute_with_context(
+                        user_input, context, stack
+                    )
 
                     # 更新补全器的上下文
                     completer.update_context(context)
@@ -287,7 +310,7 @@ def main():
 
                     if args.time:
                         print(f"Execution time: {time.time() - start_time:.6f} seconds")
-                        
+
                 except EOFError:
                     # Ctrl+D 处理
                     print("\nExited")
@@ -302,7 +325,7 @@ def main():
                 # 详细错误信息
                 error_type = type(e).__name__
                 print(f"{error_type}: {e}")
-                
+
                 # 显示错误行号和文件（如果可用）
                 tb = traceback.extract_tb(sys.exc_info()[2])
                 if tb:
@@ -311,7 +334,7 @@ def main():
                         print(f"  at line {line}, in {func}")
                         if text:
                             print(f"  {text}")
-                
+
                 # 可选：添加调试模式显示完整堆栈
                 if "--debug" in sys.argv:
                     traceback.print_exc()

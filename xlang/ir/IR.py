@@ -411,7 +411,9 @@ class IRExecutor:
             self.error_printer("```")
             raise e
         finally:
+            result = self.stack[-1].object_ref() if len(self.stack) > 0 else NoneType()
             self.context.pop_frame(self.stack, exit_func=True)
+            return result
 
     def execute_with_provided_context(self, entry="__main__", context=None, stack=None):
         self.context = context
@@ -419,7 +421,7 @@ class IRExecutor:
         self.ip[-1] = self.func_ips[-1][entry]
 
         current_frame_size = self.context.sizeof()
-
+        result = NoneType()
         try:
             while self.ip[-1] < len(self.instructions[-1]):
                 instr = self.instructions[-1][self.ip[-1]]
@@ -427,6 +429,7 @@ class IRExecutor:
                 self.ip[-1] += 1
                 if self.check_should_stop is not None and self.check_should_stop():
                     raise ValueError("Cancelled due to should_stop_func")
+            result = self.stack[-1].object_ref() if len(self.stack) > 0 else NoneType()
         except Exception as e:
             self.error_printer(f"# Error: {e}\n")
             self.error_printer(f"# ip: {self.ip[-1]}, ir: {instr}\n")
@@ -450,7 +453,6 @@ class IRExecutor:
             self.error_printer("```")
             raise e
         finally:
-            result = self.stack[-1].object_ref() if len(self.stack) > 0 else NoneType()
             # 裁剪栈和帧
             self.context.slice_frames_and_stack(self.stack, current_frame_size)
             return result
@@ -459,18 +461,16 @@ class IRExecutor:
         self,
         entry="__main__",
         let_dict={},
-        export_varible_name="__export__",
     ):
         self.context.new_frame(
             self.stack, enter_func=True, funciton_code_position=0, hidden=True
         )
         for key, value in let_dict.items():
             self.context.let(key, Variable(value))
-        self.context.let(export_varible_name, Variable(NoneType()))
+
         result = NoneType()
         try:
-            self.execute(entry)
-            result = self.context.get(export_varible_name)
+            result = self.execute(entry)
         except Exception as e:
             raise e
         finally:
@@ -713,15 +713,24 @@ class IRExecutor:
 
         elif instr.ir_type == IRType.IMPORT:
             # 导入IR并执行
-            path = self.stack.pop().object_ref()
+            named_path = self.stack.pop().object_ref()
+            if not isinstance(named_path, Named):
+                raise ValueError(f"Import arg must be Named, but got {named_path}")
+
+            path = named_path.key
+            default_args = named_path.value
+
             if not isinstance(path, String):
                 raise ValueError(f"Import path must be String, but got {path}")
+
+            if not isinstance(default_args, Tuple):
+                # 包装
+                default_args = Tuple([default_args])
 
             with open(path.value, "r", encoding="utf-8") as f:
                 code = f.read()
             irs = json.loads(code)
             functions = Functions()
             functions.import_from_dict(irs)
-            executor = IRExecutor(functions, code, self.error_printer, self.output_printer, self.input_reader, self.check_should_stop)
-            result = executor.execute_with_let(entry="__main__", export_varible_name="__export__")
-            self.stack.append(result)
+            lambda_ir, lambda_ir_table = functions.build_instructions()
+            self.stack.append(Lambda(instr.value, default_args, "__main__", lambda_ir_table, lambda_ir))

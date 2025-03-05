@@ -3,7 +3,8 @@ import json
 
 def test():
     module = """
-    __export__ = (
+    print(A);
+    return (
         'iter': (container => ('T' : null), n => 0) -> {
             n = n + 1;
             E := valueof container;
@@ -24,10 +25,11 @@ def test():
         }
     );
 
-    """
+    """ # 只有模块才允许使用return语句进行返回
 
     code = """
-    module := import "modules/test.xir";
+    module := import "modules/test.xir" => (A => "Default Value"); // Import the module as Lambda, () is the default argument
+    module = module(); // Call the module to get the actual value
     print(repr(module));
 
     loop_func := module.loop((n => 0) -> {
@@ -37,6 +39,7 @@ def test():
 
     loop_func();
 """
+
 
     xlang = XLang()
     ir = xlang.compile(module)

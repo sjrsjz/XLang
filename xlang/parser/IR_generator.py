@@ -239,7 +239,7 @@ class IRGenerator:
                 irs.append(IR(IRType.SELF_OF))
             elif node.children[0] == 'import':
                 irs.extend(val)
-                irs.append(IR(IRType.IMPORT))
+                irs.append(IR(IRType.IMPORT, node.node_position))
             else:
                 raise ValueError(f"Unknown modifier: {node.children[0]}")
             return irs
