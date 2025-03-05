@@ -2,7 +2,7 @@
   "__MAIN__::__function_1__": [
     {
       "DEBUG_INFO": {
-        "code_position": 97
+        "code_position": 90
       }
     },
     {
@@ -10,7 +10,7 @@
     },
     {
       "DEBUG_INFO": {
-        "code_position": 97
+        "code_position": 90
       }
     },
     {
@@ -18,7 +18,7 @@
     },
     {
       "DEBUG_INFO": {
-        "code_position": 97
+        "code_position": 90
       }
     },
     {
@@ -26,7 +26,7 @@
     },
     {
       "DEBUG_INFO": {
-        "code_position": 101
+        "code_position": 94
       }
     },
     {
@@ -34,7 +34,7 @@
     },
     {
       "DEBUG_INFO": {
-        "code_position": 105
+        "code_position": 98
       }
     },
     {
@@ -51,7 +51,7 @@
     },
     {
       "DEBUG_INFO": {
-        "code_position": 133
+        "code_position": 126
       }
     },
     {
@@ -68,7 +68,7 @@
     },
     {
       "DEBUG_INFO": {
-        "code_position": 167
+        "code_position": 160
       }
     },
     {
@@ -85,7 +85,7 @@
     },
     {
       "DEBUG_INFO": {
-        "code_position": 194
+        "code_position": 187
       }
     },
     {
@@ -93,7 +93,7 @@
     },
     {
       "DEBUG_INFO": {
-        "code_position": 199
+        "code_position": 192
       }
     },
     {
@@ -101,7 +101,7 @@
     },
     {
       "DEBUG_INFO": {
-        "code_position": 203
+        "code_position": 196
       }
     },
     {
@@ -121,7 +121,7 @@
     },
     {
       "DEBUG_INFO": {
-        "code_position": 207
+        "code_position": 200
       }
     },
     {
@@ -129,7 +129,7 @@
     },
     {
       "DEBUG_INFO": {
-        "code_position": 225
+        "code_position": 218
       }
     },
     {
@@ -137,7 +137,7 @@
     },
     {
       "DEBUG_INFO": {
-        "code_position": 232
+        "code_position": 225
       }
     },
     {
@@ -148,7 +148,7 @@
     },
     {
       "DEBUG_INFO": {
-        "code_position": 237
+        "code_position": 230
       }
     },
     {
@@ -156,7 +156,7 @@
     },
     {
       "DEBUG_INFO": {
-        "code_position": 239
+        "code_position": 232
       }
     },
     {
@@ -164,7 +164,7 @@
     },
     {
       "DEBUG_INFO": {
-        "code_position": 243
+        "code_position": 236
       }
     },
     {
@@ -184,7 +184,7 @@
     },
     {
       "DEBUG_INFO": {
-        "code_position": 270
+        "code_position": 263
       }
     },
     {
@@ -207,7 +207,7 @@
     },
     {
       "DEBUG_INFO": {
-        "code_position": 295
+        "code_position": 288
       }
     },
     {
@@ -215,7 +215,7 @@
     },
     {
       "DEBUG_INFO": {
-        "code_position": 313
+        "code_position": 306
       }
     },
     {
@@ -223,7 +223,7 @@
     },
     {
       "DEBUG_INFO": {
-        "code_position": 320
+        "code_position": 313
       }
     },
     {
@@ -254,7 +254,7 @@
   "__MAIN__::__function_2__": [
     {
       "DEBUG_INFO": {
-        "code_position": 391
+        "code_position": 384
       }
     },
     {
@@ -262,7 +262,7 @@
     },
     {
       "DEBUG_INFO": {
-        "code_position": 398
+        "code_position": 391
       }
     },
     {
@@ -278,7 +278,7 @@
   "__MAIN__::__function_3__::__function_1__": [
     {
       "DEBUG_INFO": {
-        "code_position": 474
+        "code_position": 467
       }
     },
     {
@@ -286,7 +286,7 @@
     },
     {
       "DEBUG_INFO": {
-        "code_position": 474
+        "code_position": 467
       }
     },
     {
@@ -294,12 +294,12 @@
     },
     {
       "DEBUG_INFO": {
-        "code_position": 474
+        "code_position": 467
       }
     },
     {
       "DEBUG_INFO": {
-        "code_position": 481
+        "code_position": 474
       }
     },
     {
@@ -307,7 +307,7 @@
     },
     {
       "DEBUG_INFO": {
-        "code_position": 486
+        "code_position": 479
       }
     },
     {
@@ -324,7 +324,7 @@
     },
     {
       "DEBUG_INFO": {
-        "code_position": 490
+        "code_position": 483
       }
     },
     {
@@ -332,7 +332,7 @@
     },
     {
       "DEBUG_INFO": {
-        "code_position": 512
+        "code_position": 505
       }
     },
     {
@@ -340,7 +340,7 @@
     },
     {
       "DEBUG_INFO": {
-        "code_position": 512
+        "code_position": 505
       }
     },
     {
@@ -348,7 +348,7 @@
     },
     {
       "DEBUG_INFO": {
-        "code_position": 516
+        "code_position": 509
       }
     },
     {
@@ -356,7 +356,7 @@
     },
     {
       "DEBUG_INFO": {
-        "code_position": 520
+        "code_position": 513
       }
     },
     {
@@ -393,7 +393,7 @@
   "__MAIN__::__function_3__": [
     {
       "DEBUG_INFO": {
-        "code_position": 423
+        "code_position": 416
       }
     },
     {
@@ -401,7 +401,7 @@
     },
     {
       "DEBUG_INFO": {
-        "code_position": 423
+        "code_position": 416
       }
     },
     {
@@ -409,7 +409,7 @@
     },
     {
       "DEBUG_INFO": {
-        "code_position": 431
+        "code_position": 424
       }
     },
     {
@@ -417,7 +417,7 @@
     },
     {
       "DEBUG_INFO": {
-        "code_position": 436
+        "code_position": 429
       }
     },
     {
@@ -428,7 +428,7 @@
     },
     {
       "DEBUG_INFO": {
-        "code_position": 439
+        "code_position": 432
       }
     },
     {
@@ -436,7 +436,7 @@
     },
     {
       "DEBUG_INFO": {
-        "code_position": 447
+        "code_position": 440
       }
     },
     {
@@ -451,7 +451,7 @@
     {
       "LOAD_LAMBDA": [
         "__MAIN__::__function_3__::__function_1__",
-        430
+        423
       ]
     },
     {
@@ -511,7 +511,7 @@
     },
     {
       "DEBUG_INFO": {
-        "code_position": 36
+        "code_position": 29
       }
     },
     {
@@ -519,7 +519,7 @@
     },
     {
       "DEBUG_INFO": {
-        "code_position": 45
+        "code_position": 38
       }
     },
     {
@@ -527,7 +527,7 @@
     },
     {
       "DEBUG_INFO": {
-        "code_position": 59
+        "code_position": 52
       }
     },
     {
@@ -535,7 +535,7 @@
     },
     {
       "DEBUG_INFO": {
-        "code_position": 65
+        "code_position": 58
       }
     },
     {
@@ -549,7 +549,7 @@
     },
     {
       "DEBUG_INFO": {
-        "code_position": 72
+        "code_position": 65
       }
     },
     {
@@ -557,7 +557,7 @@
     },
     {
       "DEBUG_INFO": {
-        "code_position": 77
+        "code_position": 70
       }
     },
     {
@@ -572,7 +572,7 @@
     {
       "LOAD_LAMBDA": [
         "__MAIN__::__function_1__",
-        44
+        37
       ]
     },
     {
@@ -580,7 +580,7 @@
     },
     {
       "DEBUG_INFO": {
-        "code_position": 361
+        "code_position": 354
       }
     },
     {
@@ -588,7 +588,7 @@
     },
     {
       "DEBUG_INFO": {
-        "code_position": 370
+        "code_position": 363
       }
     },
     {
@@ -596,7 +596,7 @@
     },
     {
       "DEBUG_INFO": {
-        "code_position": 379
+        "code_position": 372
       }
     },
     {
@@ -604,7 +604,7 @@
     },
     {
       "DEBUG_INFO": {
-        "code_position": 384
+        "code_position": 377
       }
     },
     {
@@ -619,7 +619,7 @@
     {
       "LOAD_LAMBDA": [
         "__MAIN__::__function_2__",
-        378
+        371
       ]
     },
     {
@@ -631,7 +631,7 @@
     {
       "LOAD_LAMBDA": [
         "__MAIN__::__function_3__",
-        369
+        362
       ]
     },
     {
@@ -639,15 +639,6 @@
     },
     {
       "BUILD_TUPLE": 2
-    },
-    {
-      "RETURN": null
-    },
-    {
-      "RESET_STACK": null
-    },
-    {
-      "LOAD_NONE": null
     },
     {
       "RETURN_NONE": null

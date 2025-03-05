@@ -4,7 +4,7 @@ import json
 def test():
     module = """
     print(A);
-    return (
+    (
         'iter': (container => ('T' : null), n => 0) -> {
             n = n + 1;
             E := valueof container;
@@ -23,9 +23,9 @@ def test():
                 };
             };
         }
-    );
+    )
 
-    """ # 只有模块才允许使用return语句进行返回
+    """ # 使用最后一个表达式作为返回值或者使用return语句返回值
 
     code = """
     module := import "modules/test.xir" => (A => "Default Value"); // Import the module as Lambda, () is the default argument

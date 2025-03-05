@@ -34,7 +34,7 @@ setup(
     },
     include_package_data=True,
     install_requires=[
-        # 项目依赖在这里列出
+        "prompt_toolkit>=3.0.0",  # 添加prompt_toolkit依赖
     ],
     keywords="programming language, interpreter, compiler",
     project_urls={

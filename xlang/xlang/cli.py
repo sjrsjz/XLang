@@ -24,6 +24,8 @@ XLANG_KEYWORDS = [
     "if",
     "else",
     "while",
+    "break",
+    "continue",
     "return",
     "int",
     "float",
@@ -36,12 +38,15 @@ XLANG_KEYWORDS = [
     "self",
     "keyof",
     "valueof",
-    "typeof",
     "selfof",
     "assert",
     "copy",
     "ref",
     "deref",
+    "help()",
+    "exit()",
+    "clear()",
+    "vars()",
 ]
 
 
