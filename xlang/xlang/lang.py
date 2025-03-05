@@ -1,4 +1,4 @@
-from xlang.ir.IR import IRExecutor, Functions
+from xlang.ir.IR import IRExecutor, Functions, create_builtins
 from xlang.parser import build_ast
 from xlang.parser.IR_generator import IRGenerator
 from xlang.ir.variable import *
@@ -25,7 +25,7 @@ class XLang:
             return [self.x_to_python(v) for v in x_value.values]
         elif isinstance(x_value, Variable):
             return self.x_to_python(x_value.value)
-        raise TypeError(f"Cant convert X type: {type(x_value)}")
+        return None
 
     def python_to_x(self, py_value):
         """将Python值转换为X语言值"""
@@ -83,6 +83,20 @@ class XLang:
             executor_args[k] = self.python_to_x(v)
         result = executor.execute_with_let(entry, executor_args, export_varible_name)
         return self.x_to_python(result)
+    
+    def execute_with_context(self, code, context, stack, entry="__main__"):
+        """使用给定的上下文和堆栈执行X语言代码"""
+        ast = build_ast(code)
+        functions = Functions()
+        generator = IRGenerator(functions=functions)
+        IRs = generator.generate(ast)
+        functions.add("__main__", IRs)
+        executor = IRExecutor(functions, code)
+        result = executor.execute_with_provided_context(entry, context, stack)
+        return self.x_to_python(result)
+    
+    def create_builtins_for_context(self, context, output_printer=print, input_reader=input):
+        create_builtins(context, output_printer, input_reader)
 
     def parse(self, code):
         """解析X语言代码并返回AST"""

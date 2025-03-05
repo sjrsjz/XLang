@@ -8,5 +8,5 @@ def build_ast(doc):
     gather = Gather(tokens)
     gathered = gather.gather()
     parser = XLangASTParser(gathered)
-    ast = parser.parse_body()
+    ast = parser.parse_without_body()
     return ast

@@ -62,6 +62,24 @@ class Context:
         #    raise Exception("Context not clean: frames not empty\n" + str(self.frames))
         del self.frames
 
+    def sizeof(self):
+        return len(self.frames)
+
+    def slice_frames_and_stack(self, stack, size):
+        """将堆栈和帧截断到指定大小"""
+        if size < 0:
+            raise ValueError("Size must be greater than 0")
+        if size == 0:
+            self.frames = []
+            self.stack_pointers = []
+            stack.clear()
+        if len(self.frames) < size:
+            raise ValueError("Unable to slice context: size is greater than current size")
+        else:
+            self.frames = self.frames[:size]
+            self.stack_pointers = self.stack_pointers[:size]
+            stack_pointer = self.stack_pointers[-1] if self.stack_pointers else 0
+            del stack[stack_pointer:]
 
     def format_stack_and_frames(self, stack):
         """返回格式化的堆栈和帧信息，而非打印"""

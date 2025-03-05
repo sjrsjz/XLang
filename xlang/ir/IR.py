@@ -413,6 +413,48 @@ class IRExecutor:
         finally:
             self.context.pop_frame(self.stack, exit_func=True)
 
+    def execute_with_provided_context(self, entry="__main__", context=None, stack=None):
+        self.context = context
+        self.stack = stack
+        self.ip[-1] = self.func_ips[-1][entry]
+
+        current_frame_size = self.context.sizeof()
+
+        try:
+            while self.ip[-1] < len(self.instructions[-1]):
+                instr = self.instructions[-1][self.ip[-1]]
+                self.execute_instruction(instr)
+                self.ip[-1] += 1
+                if self.check_should_stop is not None and self.check_should_stop():
+                    raise ValueError("Cancelled due to should_stop_func")
+        except Exception as e:
+            self.error_printer(f"# Error: {e}\n")
+            self.error_printer(f"# ip: {self.ip[-1]}, ir: {instr}\n")
+
+            if self.origin_code is not None and self.debug_info is not None:
+                self.print_debug_info()
+
+            error, code_positions = self.context.format_stack_and_frames(self.stack)
+            self.error_printer(error)
+            self.error_printer("\n# Traceback (most recent call last):")
+            self.error_printer("```")
+            # 根据code_positions打印代码执行位置
+            lines = self.origin_code.split("\n")
+            for code_position in code_positions:
+                line, column = self.calculate_line_column(code_position)
+                self.error_printer(f"## line {line + 1}, column {column + 1}")
+                print_code = ""
+                print_code += lines[line] + "\n"
+                print_code += "-" * column + "^" + "\n"
+                self.error_printer(print_code)
+            self.error_printer("```")
+            raise e
+        finally:
+            result = self.stack[-1].object_ref() if len(self.stack) > 0 else NoneType()
+            # 裁剪栈和帧
+            self.context.slice_frames_and_stack(self.stack, current_frame_size)
+            return result
+
     def execute_with_let(
         self,
         entry="__main__",
