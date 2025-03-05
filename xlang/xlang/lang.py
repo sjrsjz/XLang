@@ -84,3 +84,6 @@ class XLang:
         result = executor.execute_with_let(entry, executor_args, export_varible_name)
         return self.x_to_python(result)
 
+    def parse(self, code):
+        """解析X语言代码并返回AST"""
+        return build_ast(code)

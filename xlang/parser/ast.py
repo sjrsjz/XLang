@@ -213,7 +213,32 @@ class XLangASTNode:
     def __repr__(self):
         return self.__str__()
 
-
+    def to_dict(self):
+        if isinstance(self.children, XLangASTNode):
+            return {
+                "type": self.node_type.name,
+                "children": self.children.to_dict(),
+                "position": self.node_position,
+            }
+        if isinstance(self.children, list):
+            return {
+                "type": self.node_type.name,
+                "children": [
+                    child.to_dict() if isinstance(child, XLangASTNode) else child
+                    for child in self.children
+                ],
+                "position": self.node_position,
+            }
+        if self.children is None:
+            return {
+                "type": self.node_type.name,
+                "position": self.node_position,
+            }
+        return {
+            "type": self.node_type.name,
+            "children": self.children,
+            "position": self.node_position,
+        }
 class NodeMatcher:
     def __init__(self):
         self.matchers = {}

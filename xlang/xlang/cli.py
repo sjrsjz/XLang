@@ -58,10 +58,9 @@ def main():
             if args.time:
                 print(f"Execution time: {time.time() - start_time:.6f} seconds")
         except Exception as e:
-            if args.debug:
-                traceback.print_exc()
-            else:
-                print(f"Error: {e}", file=sys.stderr)
+
+            traceback.print_exc()
+            print(f"Error: {e}", file=sys.stderr)
             sys.exit(1)
 
     elif args.file:
@@ -81,9 +80,7 @@ def main():
                     os.makedirs(output_dir, exist_ok=True)
                 # Write compilation result
                 with open(args.output, "w", encoding="utf-8") as out_file:
-                    out_file.write(
-                        json.dumps(ir.export_to_dict(), ensure_ascii=False)
-                    )
+                    out_file.write(json.dumps(ir.export_to_dict(), ensure_ascii=False))
                 print(f"Compiled to: {args.output}")
             elif args.ast:
                 ast = xlang.parse(code)
@@ -103,10 +100,8 @@ def main():
             print(f"Error: File '{args.file}' not found", file=sys.stderr)
             sys.exit(1)
         except Exception as e:
-            if args.debug:
-                traceback.print_exc()
-            else:
-                print(f"Error: {e}", file=sys.stderr)
+            traceback.print_exc()
+            print(f"Error: {e}", file=sys.stderr)
             sys.exit(1)
 
     elif args.interactive:
@@ -116,7 +111,7 @@ def main():
         print()
 
         # Create separate interpreter instance to maintain state
-        interpreter = XLang(debug=args.debug if hasattr(args, "debug") else False)
+        interpreter = XLang()
 
         while True:
             try:
@@ -142,10 +137,8 @@ def main():
                 print("\nExited")
                 break
             except Exception as e:
-                if args.debug:
-                    traceback.print_exc()
-                else:
-                    print(f"Error: {e}")
+                traceback.print_exc()
+                print(f"Error: {e}")
     else:
         # If no arguments provided, show help
         parser.print_help()
