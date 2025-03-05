@@ -63,7 +63,7 @@ class IRGenerator:
             signture = self.function_signature_generator(node)
 
             generator = IRGenerator(self.functions, signture)
-            body_ir = generator.generate_without_redirect(node.children[1])
+            body_ir = generator.generate(node.children[1])
             body_ir.append(IR(IRType.RETURN_NONE))
             # 生成函数定义IR
 

@@ -400,6 +400,7 @@ class IRExecutor:
                     raise ValueError("Cancelled due to should_stop_func")
             result = self.stack.pop().object_ref()
         except Exception as e:
+            traceback.print_exc()
             self.error_printer(f"# Error: {e}\n")
             self.error_printer(f"# ip: {self.ip}, ir: {instr}\n")
 
@@ -591,7 +592,7 @@ class IRExecutor:
             elif isinstance(func, Lambda):
 
                 not_local_ir = False
-                if not func.lambda_ir is self.instructions:
+                if not (func.lambda_ir is self.instructions[-1]):
                     self.instructions.append(func.lambda_ir)
                     self.func_ips.append(func.lambda_ir_table)
                     not_local_ir = True
@@ -754,3 +755,6 @@ class IRExecutor:
             functions.import_from_dict(irs)
             lambda_ir, lambda_ir_table = functions.build_instructions()
             self.stack.append(Lambda(instr.value, default_args, "__main__", lambda_ir_table, lambda_ir))
+
+        else:
+            raise ValueError(f"Unknown instruction: {instr}")

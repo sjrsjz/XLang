@@ -22,17 +22,7 @@
       }
     },
     {
-      "DEBUG_INFO": {
-        "code_position": 97
-      }
-    },
-    {
       "GET_VAL": "n"
-    },
-    {
-      "DEBUG_INFO": {
-        "code_position": null
-      }
     },
     {
       "DEBUG_INFO": {
@@ -61,16 +51,6 @@
     },
     {
       "DEBUG_INFO": {
-        "code_position": 120
-      }
-    },
-    {
-      "DEBUG_INFO": {
-        "code_position": null
-      }
-    },
-    {
-      "DEBUG_INFO": {
         "code_position": 133
       }
     },
@@ -85,16 +65,6 @@
     },
     {
       "RESET_STACK": null
-    },
-    {
-      "DEBUG_INFO": {
-        "code_position": 156
-      }
-    },
-    {
-      "DEBUG_INFO": {
-        "code_position": null
-      }
     },
     {
       "DEBUG_INFO": {
@@ -115,16 +85,6 @@
     },
     {
       "DEBUG_INFO": {
-        "code_position": 190
-      }
-    },
-    {
-      "DEBUG_INFO": {
-        "code_position": null
-      }
-    },
-    {
-      "DEBUG_INFO": {
         "code_position": 194
       }
     },
@@ -137,17 +97,7 @@
       }
     },
     {
-      "DEBUG_INFO": {
-        "code_position": 199
-      }
-    },
-    {
       "GET_VAL": "len"
-    },
-    {
-      "DEBUG_INFO": {
-        "code_position": 199
-      }
     },
     {
       "DEBUG_INFO": {
@@ -167,7 +117,7 @@
       "BINARAY_OP": "<="
     },
     {
-      "REDIRECT_JUMP_IF_FALSE": "__MAIN__::__function_1__::__label_1__"
+      "JUMP_IF_FALSE": 25
     },
     {
       "DEBUG_INFO": {
@@ -187,16 +137,6 @@
     },
     {
       "DEBUG_INFO": {
-        "code_position": 225
-      }
-    },
-    {
-      "DEBUG_INFO": {
-        "code_position": null
-      }
-    },
-    {
-      "DEBUG_INFO": {
         "code_position": 232
       }
     },
@@ -212,17 +152,7 @@
       }
     },
     {
-      "DEBUG_INFO": {
-        "code_position": 237
-      }
-    },
-    {
       "GET_VAL": "T"
-    },
-    {
-      "DEBUG_INFO": {
-        "code_position": null
-      }
     },
     {
       "DEBUG_INFO": {
@@ -254,11 +184,6 @@
     },
     {
       "DEBUG_INFO": {
-        "code_position": 263
-      }
-    },
-    {
-      "DEBUG_INFO": {
         "code_position": 270
       }
     },
@@ -278,10 +203,7 @@
       "POP_FRAME": null
     },
     {
-      "REDIRECT_JUMP": "__MAIN__::__function_1__::__label_2__"
-    },
-    {
-      "REDIRECT_LABEL": "__MAIN__::__function_1__::__label_1__"
+      "JUMP_OFFSET": 11
     },
     {
       "DEBUG_INFO": {
@@ -298,11 +220,6 @@
     },
     {
       "RESET_STACK": null
-    },
-    {
-      "DEBUG_INFO": {
-        "code_position": 313
-      }
     },
     {
       "DEBUG_INFO": {
@@ -325,9 +242,6 @@
       "POP_FRAME": null
     },
     {
-      "REDIRECT_LABEL": "__MAIN__::__function_1__::__label_2__"
-    },
-    {
       "RESET_STACK": null
     },
     {
@@ -345,11 +259,6 @@
     },
     {
       "RESET_STACK": null
-    },
-    {
-      "DEBUG_INFO": {
-        "code_position": 391
-      }
     },
     {
       "DEBUG_INFO": {
@@ -389,25 +298,12 @@
       }
     },
     {
-      "REDIRECT_LABEL": "__MAIN__::__function_3__::__function_1__::__label_1__"
-    },
-    {
-      "DEBUG_INFO": {
-        "code_position": 481
-      }
-    },
-    {
       "DEBUG_INFO": {
         "code_position": 481
       }
     },
     {
       "GET_VAL": "func"
-    },
-    {
-      "DEBUG_INFO": {
-        "code_position": 481
-      }
     },
     {
       "DEBUG_INFO": {
@@ -424,7 +320,7 @@
       "CALL_LAMBDA": null
     },
     {
-      "REDIRECT_JUMP_IF_FALSE": "__MAIN__::__function_3__::__function_1__::__label_2__"
+      "JUMP_IF_FALSE": 17
     },
     {
       "DEBUG_INFO": {
@@ -448,17 +344,7 @@
       }
     },
     {
-      "DEBUG_INFO": {
-        "code_position": 512
-      }
-    },
-    {
       "GET_VAL": "n"
-    },
-    {
-      "DEBUG_INFO": {
-        "code_position": null
-      }
     },
     {
       "DEBUG_INFO": {
@@ -492,10 +378,7 @@
       "POP_FRAME": null
     },
     {
-      "REDIRECT_JUMP": "__MAIN__::__function_3__::__function_1__::__label_1__"
-    },
-    {
-      "REDIRECT_LABEL": "__MAIN__::__function_3__::__function_1__::__label_2__"
+      "JUMP_OFFSET": -22
     },
     {
       "RESET_STACK": null
@@ -526,26 +409,6 @@
     },
     {
       "DEBUG_INFO": {
-        "code_position": 423
-      }
-    },
-    {
-      "DEBUG_INFO": {
-        "code_position": 430
-      }
-    },
-    {
-      "DEBUG_INFO": {
-        "code_position": 431
-      }
-    },
-    {
-      "DEBUG_INFO": {
-        "code_position": 431
-      }
-    },
-    {
-      "DEBUG_INFO": {
         "code_position": 431
       }
     },
@@ -562,11 +425,6 @@
     },
     {
       "BUILD_NAMED": null
-    },
-    {
-      "DEBUG_INFO": {
-        "code_position": 439
-      }
     },
     {
       "DEBUG_INFO": {

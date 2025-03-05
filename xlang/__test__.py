@@ -41,6 +41,9 @@ def test():
 
 """
 
+
+
+
     xlang = XLang()
     ir = xlang.compile(module)
     with open("modules/test.xir", "w", encoding='utf-8') as f:
