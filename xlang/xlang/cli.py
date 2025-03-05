@@ -335,9 +335,8 @@ def main():
                         if text:
                             print(f"  {text}")
 
-                # 可选：添加调试模式显示完整堆栈
-                if "--debug" in sys.argv:
-                    traceback.print_exc()
+
+                traceback.print_exc()
     else:
         # If no arguments provided, show help
         parser.print_help()

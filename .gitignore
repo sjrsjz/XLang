@@ -4,3 +4,4 @@ old
 build
 dist
 *.egg-info
+python_env

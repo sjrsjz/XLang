@@ -1,4 +1,4 @@
-from xlang.ir.IR import IRExecutor, Functions, create_builtins
+from xlang.ir.IR import IRExecutor, Functions, create_builtins, IRType, IR
 from xlang.parser import build_ast
 from xlang.parser.IR_generator import IRGenerator
 from xlang.ir.variable import *
@@ -57,6 +57,7 @@ class XLang:
         functions = Functions()
         generator = IRGenerator(functions=functions, namespace=namespace)
         IRs = generator.generate(ast)
+        IRs.append(IR(IRType.RETURN_NONE))
         functions.add("__main__", IRs)
         return functions
 
@@ -75,12 +76,13 @@ class XLang:
         functions = Functions()
         generator = IRGenerator(functions=functions)
         IRs = generator.generate(ast)
+        IRs.append(IR(IRType.RETURN_NONE))
         functions.add("__main__", IRs)
-        executor = IRExecutor(functions, code, error_printer, output_printer, input_reader, should_stop_func)
+        executor = IRExecutor(code, error_printer, output_printer, input_reader, should_stop_func)
         executor_args = {}
         for k, v in kwargs.items():
             executor_args[k] = self.python_to_x(v)
-        result = executor.execute_with_let(entry, executor_args)
+        result = executor.execute_with_let(functions, entry, executor_args)
         return self.x_to_python(result)
     
     def execute_with_context(self, code, context, stack, entry="__main__"):
@@ -89,9 +91,11 @@ class XLang:
         functions = Functions()
         generator = IRGenerator(functions=functions)
         IRs = generator.generate(ast)
+        IRs.append(IR(IRType.RETURN_NONE))
         functions.add("__main__", IRs)
-        executor = IRExecutor(functions, code)
-        result = executor.execute_with_provided_context(entry, context, stack)
+        print(functions)
+        executor = IRExecutor(code)
+        result = executor.execute_with_provided_context(functions, entry, context, stack)
         return self.x_to_python(result)
     
     def create_builtins_for_context(self, context, output_printer=print, input_reader=input):

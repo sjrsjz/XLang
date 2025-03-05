@@ -830,6 +830,9 @@
     },
     {
       "RESET_STACK": null
+    },
+    {
+      "RETURN_NONE": null
     }
   ]
 }

@@ -319,13 +319,12 @@ def create_builtins(context, output_printer=print, input_reader=input):
 
 
 class IRExecutor:
-    def __init__(self, functions, origin_code=None, error_printer = print, output_printer=print, input_reader=input, should_stop_func=None):
+    def __init__(self, origin_code=None, error_printer = print, output_printer=print, input_reader=input, should_stop_func=None):
         self.stack = []
         self.context = Context()
-        self.ip = [0]  # 指令指针
-        instructions, func_ips = functions.build_instructions()
-        self.instructions = [instructions] # 使用列表存储多个ir，用于支持 import
-        self.func_ips = [func_ips]
+        self.ip = []  # 指令指针
+        self.instructions = [] # 使用列表存储多个ir，用于支持 import
+        self.func_ips = []
         self.origin_code = origin_code
         self.debug_info = None
         self.error_printer = error_printer
@@ -374,21 +373,40 @@ class IRExecutor:
         self.error_printer(print_code)
         self.error_printer("```")
 
-    def execute(self, entry="__main__"):
+    def execute(self, functions, entry="__main__"):
         self.context.new_frame(
             self.stack, enter_func=True, funciton_code_position=0, hidden=True
         )
         create_builtins(self.context, self.output_printer, self.input_reader)
-        self.ip[-1] = self.func_ips[-1][entry]
 
+        lambda_ir, lambda_ir_table = functions.build_instructions()
+        self.instructions.append(lambda_ir)
+        self.func_ips.append(lambda_ir_table)
+        self.ip.append(self.func_ips[-1][entry])
+        self.stack.append((0, True))  # 保存当前ip和是否是新ir
         try:
-            while self.ip[-1] < len(self.instructions[-1]):
-                instr = self.instructions[-1][self.ip[-1]]
-                self.execute_instruction(instr)
-                self.ip[-1] += 1
-                if self.check_should_stop is not None and self.check_should_stop():
-                    raise ValueError("Cancelled due to should_stop_func")
+            while len(self.ip) > 0:
+                while self.ip[-1] < len(self.instructions[-1]):
+                    instr = self.instructions[-1][self.ip[-1]]
+                    self.execute_instruction(instr)
+                    self.ip[-1] += 1
+                    if self.check_should_stop is not None and self.check_should_stop():
+                        raise ValueError("Cancelled due to should_stop_func")
+                # 先重置栈
+                if self.context.stack_pointers[-1] + 1 < len(self.stack):
+                    result = self.stack[-1].object_ref() # 保存结果
+                else:
+                    result = NoneType()
+                del self.stack[self.context.stack_pointers[-1] + 1 :]
+                last_ip = self.stack.pop()
+                if last_ip[1]:
+                    self.ip.pop()
+                    self.instructions.pop() # 删除指令表
+                    self.func_ips.pop() # 删除函数表
+
+
         except Exception as e:
+            traceback.print_exc()
             self.error_printer(f"# Error: {e}\n")
             self.error_printer(f"# ip: {self.ip[-1]}, ir: {instr}\n")
 
@@ -411,26 +429,42 @@ class IRExecutor:
             self.error_printer("```")
             raise e
         finally:
-            result = self.stack[-1].object_ref() if len(self.stack) > 0 else NoneType()
             self.context.pop_frame(self.stack, exit_func=True)
             return result
 
-    def execute_with_provided_context(self, entry="__main__", context=None, stack=None):
+    def execute_with_provided_context(self, functions, entry="__main__", context=None, stack=None):
         self.context = context
         self.stack = stack
-        self.ip[-1] = self.func_ips[-1][entry]
+        lambda_ir, lambda_ir_table = functions.build_instructions()
+        self.instructions.append(lambda_ir)
+        self.func_ips.append(lambda_ir_table)
+        self.ip.append(self.func_ips[-1][entry])
+        self.stack.append((0, True))  # 保存当前ip和是否是新ir
 
         current_frame_size = self.context.sizeof()
         result = NoneType()
         try:
-            while self.ip[-1] < len(self.instructions[-1]):
-                instr = self.instructions[-1][self.ip[-1]]
-                self.execute_instruction(instr)
-                self.ip[-1] += 1
-                if self.check_should_stop is not None and self.check_should_stop():
-                    raise ValueError("Cancelled due to should_stop_func")
-            result = self.stack[-1].object_ref() if len(self.stack) > 0 else NoneType()
+            while len(self.ip) > 0:
+                while self.ip[-1] < len(self.instructions[-1]):
+                    instr = self.instructions[-1][self.ip[-1]]
+                    self.execute_instruction(instr)
+                    self.ip[-1] += 1
+                    if self.check_should_stop is not None and self.check_should_stop():
+                        raise ValueError("Cancelled due to should_stop_func")
+                # 先重置栈
+                if self.context.stack_pointers[-1] + 1 < len(self.stack):
+                    result = self.stack[-1].object_ref() # 保存结果
+                else:
+                    result = NoneType()
+                del self.stack[self.context.stack_pointers[-1] + 1 :]
+                last_ip = self.stack.pop()
+                if last_ip[1]:
+                    self.ip.pop()
+                    self.instructions.pop()
+                    self.func_ips.pop()
+                    
         except Exception as e:
+            traceback.print_exc()
             self.error_printer(f"# Error: {e}\n")
             self.error_printer(f"# ip: {self.ip[-1]}, ir: {instr}\n")
 
@@ -459,6 +493,7 @@ class IRExecutor:
 
     def execute_with_let(
         self,
+        functions,
         entry="__main__",
         let_dict={},
     ):
@@ -470,7 +505,7 @@ class IRExecutor:
 
         result = NoneType()
         try:
-            result = self.execute(entry)
+            result = self.execute(functions, entry)
         except Exception as e:
             raise e
         finally:
