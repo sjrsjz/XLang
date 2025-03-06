@@ -46,17 +46,21 @@ XLang 提供以下数据类型：
 ### 3.1 基本类型
 
 #### 整数 (Int)
+
 ```
 x := 42;
 ```
 
 #### 浮点数 (Float)
+
 ```
 y := 3.14;
 ```
 
 #### 字符串 (String)
+
 XLang 支持多种字符串表示形式：单引号、双引号、三引号，并支持字符串转义序列。
+
 ```
 name1 := "XLang";
 name2 := 'XLang';
@@ -67,11 +71,13 @@ multiline := '''
 ```
 
 #### 布尔值 (Bool)
+
 ```
 isValid := true;
 ```
 
 #### 空值 (NoneType)
+
 ```
 data := null;
 ```
@@ -79,18 +85,23 @@ data := null;
 ### 3.2 复合类型
 
 #### 元组 (Tuple)
+
 元组是值的有序集合，可包含不同类型：
+
 ```
 coordinates := (10, 20, 30);
 ```
 
 #### 键值对 (KeyValue)
+
 键值对用于关联键和值：
+
 ```
 point := ('x': 10, 'y': 20);
 ```
 
 #### 函数 (Lambda)
+
 ```
 adder := (a, b) -> {
     return a + b;
@@ -98,11 +109,13 @@ adder := (a, b) -> {
 ```
 
 #### 命名参数 (Named)
+
 ```
 namedArg := name => "default";
 ```
 
 #### 内置函数 (BuiltIn)
+
 系统提供的内置函数类型。
 
 ## 4. 变量
@@ -149,28 +162,31 @@ func := (captured => outer) -> {  // 显式捕获outer变量
 根据AST解析器代码分析，XLang的运算符优先级从高到低排列如下：
 
 1. **最高优先级**
+
    - 变量/常量/括号表达式/作用域 (优先级1)
    - 成员访问：`.`, `[]`, `()`（函数调用）(优先级2)
    - 修饰符：`copy`, `ref`, `deref`, `keyof`, `valueof`, `selfof`, `assert`, `import` (优先级3)
-
 2. **算术运算符**
+
    - 乘法级：`*`, `/`, `%` (优先级9)
-   - 加法级：`+`, `-` (优先级10) 
+   - 加法级：`+`, `-` (优先级10)
    - 一元运算符：`+`, `-` (与加法级相同)
-
 3. **比较运算符**
-   - 比较级：`>`, `<`, `>=`, `<=`, `==`, `!=` (优先级11)
-   
-4. **逻辑运算符**
-   - 逻辑级：`&&`, `||` (优先级12)
 
+   - 比较级：`>`, `<`, `>=`, `<=`, `==`, `!=` (优先级11)
+4. **逻辑运算符**
+
+   - 逻辑级：`not` (优先级12)
+   - 逻辑与：`and` (优先级13)
+   - 逻辑或：`or` (优先级14)
 5. **控制结构**
+
    - `break`, `continue` (优先级19)
    - `if` (优先级20)
    - `while` (优先级21)
-
 6. **其他运算符**
-   - 键值对：`:` (优先级22) 
+
+   - 键值对：`:` (优先级22)
    - 命名参数：`=>` (优先级23)
    - 赋值：`=` (优先级30)
    - 变量声明：`:=` (优先级40)
@@ -211,12 +227,13 @@ isGreater := age > 18;
 
 ### 5.4 逻辑运算符
 
-- `&&`: 逻辑与
-- `||`: 逻辑或
+- `not`: 逻辑非
+- `and`: 逻辑与
+- `or`: 逻辑或
 
 ```
-isValid := age > 18 && hasID;
-isEligible := hasLicense || hasPermit;
+isValid := age > 18 and hasID;
+isEligible := hasLicense or hasPermit;
 ```
 
 ### 5.5 成员访问运算符
@@ -251,6 +268,7 @@ result := if condition 1 else 0;
 ```
 
 支持 else if 组合：
+
 ```
 if (operator == "+") {
     // 加法操作
@@ -278,7 +296,7 @@ while (condition) {
     if (breakCondition) {
         break;  // 跳出循环
     };
-    
+  
     if (skipCondition) {
         continue;  // 跳到下一次迭代
     };
@@ -304,7 +322,7 @@ while (i < 5) {
 ### 7.1 函数定义
 
 ```
-add := (a, b) -> {
+add := (a => 0, b => 0) -> {
     return a + b;
 };
 ```
@@ -333,7 +351,7 @@ result2 := greet(greeting => "Hi", name => "Alice");  // 使用命名参数
 XLang 中的闭包必须**显式捕获**外部变量作为参数：
 
 ```
-createCounter := (startValue) -> {
+createCounter := (startValue => 0) -> {
     return (count => startValue) -> {  // 显式捕获startValue
         count = count + 1;
         return count;
@@ -352,13 +370,14 @@ value2 := counter();  // 12
 ```
 person := (
     'name': "John",
-    'greet': () -> {
+    greet => () -> {
         return "Hello, my name is " + self.name;
     }
 );
 ```
 
 **重要特性**：方法可以单独提取并调用，仍然保持对原始对象的引用：
+
 ```
 method := person.greet;
 greeting := method();  // "Hello, my name is John"
@@ -385,7 +404,7 @@ subset := slice(numbers, 1, 3);  // (2, 3)
 combined := numbers + (6, 7, 8);
 ```
 
-**注意**：元组在构建时会遍历所有元素，如果元素是Lambda类型，会将元组自身引用传递给Lambda的self属性，这样Lambda就可以访问元组的成员。
+**注意**：元组在构建时会遍历所有元素，如果元素Named下的Lambda类型，会将元组自身引用传递给Lambda的self属性，这样Lambda就可以访问元组的成员。
 
 ### 8.2 对象式操作
 
@@ -396,7 +415,7 @@ XLang 使用键值对创建类似对象的结构：
 person := (
     'name': "John",
     'age': 30,
-    'greet': () -> {
+    greet => () -> {
         return "Hello, my name is " + self.name;
     }
 );
@@ -470,10 +489,10 @@ result := math.add(5, 3);
 // 在module.xir文件中
 print(config);  // 使用导入时传入的参数
 (
-    'add': (a, b) -> {
+    add => (a => 0, b => 0) -> {
         return a + b;
     },
-    'subtract': (a, b) -> {
+    subtract => (a => 0, b => 0) -> {
         return a - b;
     }
 )
@@ -516,7 +535,7 @@ XLang 运行迭代语法，但同样可以实现迭代器模式：
 
 ```
 iterator := (
-    'iter': (container => ('T' : null), n => 0) -> {
+    iter => (container => ('T' : null), n => 0) -> {
         n = n + 1;
         E := valueof container;  // 获取容器的值引用
         T := keyof container;    // 获取容器的键
@@ -527,7 +546,7 @@ iterator := (
             return false;
         };
     },
-    'loop': (func => (n => 0) -> {return false}) -> {
+    loop => (func => (n => 0) -> {return false}) -> {
         return (n => 0, func => func) -> {
             while (func(n)) {
                 n = n + 1;
@@ -587,7 +606,7 @@ print(add(5, 3));  // 输出: 8
 ```
 person := (
     'name': 'Alice',
-    'greet': (message => 'Hello') -> {
+    greet => (message => 'Hello') -> {
         return message + ", " + self.name + "!";
     }
 );
@@ -627,14 +646,14 @@ print(max(5, 3));  // 输出: 5
 
 ```
 // 创建一个"类"
-Person := (name, age) -> {
+Person := (name => '', age => 0) -> {
     return (
         'name': name,
         'age': age,
-        'greet': () -> {
+        greet => () -> {
             return "Hello, I'm " + self.name;
         },
-        'birthday': () -> {
+        birthday => () -> {
             self.age = self.age + 1;
             return "Happy birthday! Now I'm " + str(self.age);
         }
@@ -666,7 +685,7 @@ x := 0;
 x = 1 + 2;  // x = (1+2) = 3
 
 // 逻辑运算符优先级
-condition := 5 > 3 && 10 < 20;  // (5 > 3) && (10 < 20) = true
+condition := 5 > 3 and 10 < 20;  // (5 > 3) and (10 < 20) = true
 ```
 
 ## 14. 错误处理
@@ -688,47 +707,48 @@ assert(x > 0);
 ## 15. 最佳实践
 
 1. **显式变量捕获**
+
    ```
    outer := 10;
    // 正确：显式捕获外部变量
    func := (captured => outer) -> { return captured + 1; };
    ```
-
 2. **使用命名参数提高可读性**
+
    ```
    createPerson(name => "John", age => 30);
    ```
-
 3. **使用元组实现面向对象编程**
+
    ```
    person := (
        'name': "John",
-       'greet': () -> { return "Hello, " + self.name; }
+       greet => () -> { return "Hello, " + self.name; }
    );
    ```
-
 4. **模块化代码**
+
    ```
    // 创建可复用的模块
    mathModule := (
-       'add': (a, b) -> { return a + b; },
-       'multiply': (a, b) -> { return a * b; }
+       add => (a => 0, b => 0) -> { return a + b; },
+       multiply => (a => 0, b => 0) -> { return a * b; }
    );
    ```
-
 5. **使用引用类型管理共享状态**
+
    ```
    shared := ('count': 0);
    sharedRef := ref shared;
    ```
-
 6. **使用分号分隔表达式序列**
+
    ```
    // 多个表达式，返回最后一个表达式的值
    result := (x = 1; y = 2; x + y);  // result为3
    ```
-
 7. **合理运用运算符优先级**
+
    ```
    // 使用括号明确优先级
    result := (1 + 2) * 3;  // 而不是依赖默认优先级
@@ -737,18 +757,12 @@ assert(x > 0);
 ## 16. 局限性与注意事项
 
 1. **闭包变量必须显式捕获**：所有在闭包中使用的外部变量必须作为参数显式捕获。
-
 2. **分号要求**：所有表达式末尾必须有分号（除了最后一个表达式），包括控制结构。
-
 3. **动态类型检查**：类型错误在运行时检测，没有静态类型检查。
-
-4. **条件表达式括号**：块形式的`if`和`while`语句的条件如果是复杂表达式必须用括号包围。
-
+4. **条件表达式括号**：块形式的 `if`和 `while`语句的条件如果是复杂表达式必须用括号包围。
 5. **模块导入机制**：模块被视为Lambda表达式，必须先调用才能获取实际内容。
-
-6. **属性访问自动转换**：当使用点操作符访问对象属性时，如`obj.name`，标识符`name`会被自动解析为字符串`'name'`。
-
-7. **表达式序列**：分号分隔的表达式序列会返回最后一个表达式的值，空表达式返回`null`。
-
+6. **属性访问自动转换**：当使用点操作符访问对象属性时，如 `obj.name`，标识符 `name`会被自动解析为字符串 `'name'`。
+7. **表达式序列**：分号分隔的表达式序列会返回最后一个表达式的值，空表达式返回 `null`。
 8. **运算符优先级**：注意运算符的优先级顺序，特别是在复杂表达式中，必要时使用括号明确意图。
-
+9. **参数缓存**：Lambda函数的参数会被缓存，也就是说，如果不显示指定参数的值，那么参数会使用上一次的值。
+10. **元组Lambda捕获**：元组在构建时会遍历所有元素，如果元素是Named类型的值且值是Lambda类型，会将元组自身引用传递给Lambda的self属性，这样Lambda就可以访问元组的成员。

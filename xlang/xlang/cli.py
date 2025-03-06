@@ -263,10 +263,10 @@ def main():
         # Create separate interpreter instance to maintain state
         context = Context()
         stack = []
-        context.new_frame(stack=stack, enter_func=True)
+        context.new_frame(stack=stack, enter_func=True, hidden=True)
         interpreter = XLang()
         interpreter.create_builtins_for_context(context)
-
+        context.new_frame(stack=stack, enter_func=True)
         # 设置自动补全
         completer = XLangCompleter(context)
         session.completer = completer
@@ -284,6 +284,7 @@ def main():
 
                     # 检查退出命令
                     if user_input.strip() == "exit()":
+                        context.pop_frame(stack, exit_func=True)
                         context.pop_frame(stack, exit_func=True)
                         break
 
@@ -331,6 +332,7 @@ def main():
                     # Ctrl+D 处理
                     print("\nExited")
                     context.pop_frame(stack, exit_func=True)
+                    context.pop_frame(stack, exit_func=True)
                     break
 
             except KeyboardInterrupt:
@@ -350,7 +352,6 @@ def main():
                         print(f"  at line {line}, in {func}")
                         if text:
                             print(f"  {text}")
-
 
                 traceback.print_exc()
     else:

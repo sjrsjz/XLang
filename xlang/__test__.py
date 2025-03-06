@@ -5,7 +5,7 @@ def test():
     module = """
     print(A);
     (
-        'iter': (container => ('T' : null), n => 0) -> {
+        iter => (container => ('T' : null), n => 0) -> {
             n = n + 1;
             E := valueof container;
             T := keyof container;
@@ -16,7 +16,7 @@ def test():
                 return false;
             };
         },
-        'loop': (func => (n => 0) -> {return false}) -> {
+        loop => (func => (n => 0) -> {return false}) -> {
             return (n => 0, func => func) -> {
                 while (func(n)) {
                     n = n + 1;
@@ -25,7 +25,7 @@ def test():
         }
     )
 
-    """ # 使用最后一个表达式作为返回值或者使用return语句返回值
+    """  # 使用最后一个表达式作为返回值或者使用return语句返回值
 
     code = """
     module := import "modules/test.xir" => (A => "Default Value"); // Import the module as Lambda, () is the default argument
@@ -34,15 +34,12 @@ def test():
 
     loop_func := module.loop((n => 0) -> {
         print(n);
-        return n < 0;
+        return n < 20;
     });
 
     loop_func();
 
 """
-
-
-
 
     xlang = XLang()
     ir = xlang.compile(module)

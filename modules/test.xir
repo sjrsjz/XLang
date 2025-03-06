@@ -576,7 +576,7 @@
       ]
     },
     {
-      "BUILD_KEY_VAL": null
+      "BUILD_NAMED": null
     },
     {
       "DEBUG_INFO": {
@@ -635,7 +635,7 @@
       ]
     },
     {
-      "BUILD_KEY_VAL": null
+      "BUILD_NAMED": null
     },
     {
       "BUILD_TUPLE": 2

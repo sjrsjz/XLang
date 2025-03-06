@@ -20,8 +20,6 @@ from .variable import (
 
 import json
 import textwrap
-import asyncio
-import traceback
 
 class IRType(enum.Enum):
     LOAD_NONE = auto()  # 加载 None 到栈
@@ -398,9 +396,10 @@ class IRExecutor:
                 self.ip += 1
                 if self.check_should_stop is not None and self.check_should_stop():
                     raise ValueError("Cancelled due to should_stop_func")
+            if len(self.stack) == 0:
+                raise ValueError("No return value")
             result = self.stack.pop().object_ref()
         except Exception as e:
-            traceback.print_exc()
             self.error_printer(f"# Error: {e}\n")
             self.error_printer(f"# ip: {self.ip}, ir: {instr}\n")
 
@@ -444,6 +443,8 @@ class IRExecutor:
                 self.ip += 1
                 if self.check_should_stop is not None and self.check_should_stop():
                     raise ValueError("Cancelled due to should_stop_func")
+            if len(self.stack) == 0:
+                raise ValueError("No return value")
             result = self.stack.pop().object_ref()
         except Exception as e:
             self.error_printer(f"# Error: {e}\n")
@@ -554,6 +555,10 @@ class IRExecutor:
                 self.stack.append(left >= right)
             elif op == "%":
                 self.stack.append(left % right)
+            elif op == "and":
+                self.stack.append(Bool(left and right))
+            elif op == "or":
+                self.stack.append(Bool(left or right))
             else:
                 raise ValueError(f"Unknown binary operator: {op}")
 
@@ -564,7 +569,7 @@ class IRExecutor:
             if op == "-":
                 self.stack.append(-value)
             elif op == "not":
-                self.stack.append(not value)
+                self.stack.append(Bool(not value))
             else:
                 raise ValueError(f"Unknown unary operator: {op}")
 
@@ -627,6 +632,8 @@ class IRExecutor:
             else:
                 raise ValueError(f"Object: {func} is not callable")
         elif instr.ir_type == IRType.RETURN:
+            if len(self.stack) < self.context.stack_pointers[-1]:
+                raise ValueError(f"Cant return without value")
             result = self.stack.pop()
             del self.stack[self.context.stack_pointers[-1]:]
             ip_info = self.stack.pop()
@@ -635,12 +642,12 @@ class IRExecutor:
                 self.instructions.pop() # 删除外部ir
                 self.func_ips.pop()
             self.context.pop_frame(self.stack, exit_func=True)
-
             self.stack.append(result)
 
         elif instr.ir_type == IRType.RETURN_NONE:
+            if len(self.stack) < self.context.stack_pointers[-1]:
+                raise ValueError(f"Cant return without value")
             result = self.stack.pop()
-            # 平栈
             del self.stack[self.context.stack_pointers[-1]:]
             ip_info = self.stack.pop()
             self.ip = ip_info[0]

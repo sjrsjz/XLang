@@ -667,9 +667,10 @@ class XLangControlFlow:
         return None, 0
 
 
-@node_matcher.register(priority=12)
-class XLangOperatorLevel3:
-    # 逻辑运算符: &&, ||
+
+@node_matcher.register(priority=14)
+class XLangOr:
+    # 逻辑运算符: or
     def __init__(self, token_list):
         self.token_list = token_list
 
@@ -683,9 +684,7 @@ class XLangOperatorLevel3:
 
         while offset >= 0:
             pos = start_idx + offset
-            if _is_symbol(self.token_list[pos], "&&") or _is_symbol(
-                self.token_list[pos], "||"
-            ):
+            if _is_identifier(self.token_list[pos], "or"):
                 operation = self.token_list[pos][0]["token"]
                 operation_pos = pos
                 break
@@ -715,6 +714,77 @@ class XLangOperatorLevel3:
                 XLangASTNodeTypes.OPERATION, [left_node, operation, right_node]
             ),
             len(self.token_list) - start_idx,  # 返回整个匹配长度
+        )
+
+
+@node_matcher.register(priority=13)
+class XLangAnd:
+    # 逻辑运算符: and
+    def __init__(self, token_list):
+        self.token_list = token_list
+
+    def match(self, start_idx):
+        # 从右向左搜索运算符
+        offset = len(self.token_list) - start_idx - 1
+
+        # 从末尾向左搜索第一个 && 或 || 运算符
+        operation = None
+        operation_pos = -1
+
+        while offset >= 0:
+            pos = start_idx + offset
+            if _is_identifier(self.token_list[pos], "and"):
+                operation = self.token_list[pos][0]["token"]
+                operation_pos = pos
+                break
+            offset -= 1
+
+        if operation is None:
+            return None, 0  # 没有找到运算符
+
+        # 左侧部分
+        left_tokens = self.token_list[start_idx:operation_pos]
+        # 右侧部分
+        right_tokens = self.token_list[operation_pos + 1 :]
+
+        # 解析左侧表达式
+        left_node, left_offset = node_matcher.match(left_tokens, 0)
+        if not left_node or left_offset != len(left_tokens):
+            return None, 0
+
+        # 解析右侧表达式
+        right_node, right_offset = node_matcher.match(right_tokens, 0)
+        if not right_node or right_offset != len(right_tokens):
+            return None, 0
+
+        # 构建操作节点
+        return (
+            XLangASTNode(
+                XLangASTNodeTypes.OPERATION, [left_node, operation, right_node]
+            ),
+            len(self.token_list) - start_idx,  # 返回整个匹配长度
+        )
+
+
+@node_matcher.register(priority=12)
+class XLangNot:
+    def __init__(self, token_list):
+        self.token_list = token_list
+
+    def match(self, start_idx):
+        if start_idx >= len(self.token_list):
+            return None, 0
+        if not _is_identifier(self.token_list[start_idx], "not"):
+            return None, 0
+
+        # 解析右侧表达式
+        right_guess, right_offset = node_matcher.match(self.token_list, start_idx + 1)
+        if not right_guess:
+            return None, 0
+
+        return (
+            XLangASTNode(XLangASTNodeTypes.OPERATION, ["not", right_guess]),
+            right_offset + 1,  # 返回整个匹配长度
         )
 
 
@@ -947,7 +1017,6 @@ class XLangOperatorLevel0:
             ),
             len(self.token_list) - start_idx,  # 返回整个匹配长度
         )
-
 
 @node_matcher.register(priority=4)
 class XLangFunctionDef:

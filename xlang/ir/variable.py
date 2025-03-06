@@ -209,9 +209,17 @@ class Bool:
 
     def __ne__(self, other):
         return Bool(self.value != other.value)
+
+
+    def __and__(self, other):
+        if not isinstance(other, Bool):
+            return NoneType()
+        return Bool(self.value and other.value)
     
-    def __not__(self):
-        return Bool(not self.value)
+    def __or__(self, other):
+        if not isinstance(other, Bool):
+            return NoneType()
+        return Bool(self.value or other.value)
 
     def __bool__(self):
         return self.value
@@ -365,7 +373,7 @@ class Tuple:
     def __init__(self, values):
         self.value = values
         for value in values:
-            if isinstance(value, KeyValue) and isinstance(value.value, Lambda):
+            if isinstance(value, Named) and isinstance(value.value, Lambda):
                 value.value.self_object = self  # 传递调用者，以便在 Lambda 中访问 Tuple 的值
 
     def __str__(self):
