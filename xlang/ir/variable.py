@@ -363,36 +363,36 @@ class Lambda:
 
 class Tuple:
     def __init__(self, values):
-        self.values = values
+        self.value = values
         for value in values:
             if isinstance(value, KeyValue) and isinstance(value.value, Lambda):
                 value.value.self_object = self  # 传递调用者，以便在 Lambda 中访问 Tuple 的值
 
     def __str__(self):
-        return f"Tuple({self.values})"
+        return f"Tuple({self.value})"
 
     def __repr__(self):
         return str(self)
 
     def __getitem__(self, index):
-        return self.values[index]
+        return self.value[index]
 
     def __setitem__(self, index, value):
-        self.values[index] = value
+        self.value[index] = value
 
     def __len__(self):
-        return len(self.values)
+        return len(self.value)
 
     def __iter__(self):
-        return iter(self.values)
+        return iter(self.value)
 
     def __contains__(self, item):
-        return item in self.values
+        return item in self.value
 
     def __eq__(self, other):
         if not isinstance(other, Tuple):
             return Bool(False)
-        return self.values == other.values
+        return self.value == other.value
 
     def __ne__(self, other):
         return not self.__eq__(other)
@@ -400,16 +400,16 @@ class Tuple:
     def __add__(self, other):
         if not isinstance(other, Tuple):
             return NoneType()
-        return Tuple(self.values + other.values)
+        return Tuple(self.value + other.value)
 
     def get_member(self, key):
-        for value in self.values:
+        for value in self.value:
             if value.check_key(key):
                 return value.value
         raise KeyError(f"'{key}' not found in Tuple")
 
     def set_member(self, key, value):
-        for item in self.values:
+        for item in self.value:
             if item.check_key(key):
                 item.value = value
                 return
@@ -417,12 +417,12 @@ class Tuple:
     
     def copy(self):
         copyed_values = []
-        for value in self.values:
+        for value in self.value:
             copyed_values.append(value.copy())
         return Tuple(copyed_values)
 
     def assgin(self, value):
-        self.values = value.values.copy() # 浅拷贝
+        self.value = value.value.copy() # 浅拷贝
 
     def object_ref(self):
         return self
@@ -433,10 +433,10 @@ class Tuple:
 
         # 分离 key-value 对和普通值
         key_values = []
-        assgined = [False] * len(self.values)
+        assgined = [False] * len(self.value)
         normal_values = []
 
-        for item in tuple.values:
+        for item in tuple.value:
             if isinstance(item, Named):
                 key_values.append(item)
             else:
@@ -446,17 +446,17 @@ class Tuple:
         for kv in key_values:
             found = False
             # 在当前元组中查找匹配的键
-            for i, value in enumerate(self.values):
+            for i, value in enumerate(self.value):
                 if isinstance(value, Named) and value.key == kv.key:
                     # 找到匹配的键，进行赋值
-                    self.values[i].value = kv.value
+                    self.value[i].value = kv.value
                     assgined[i] = True
                     found = True
                     break
 
             if not found:
                 # 如果没有找到匹配的键，添加新的键值对
-                self.values.append(kv)
+                self.value.append(kv)
 
         # 按顺序处理剩下的普通值
         normal_index = 0
@@ -464,18 +464,18 @@ class Tuple:
             # 寻找一个非 key-value 的位置进行赋值
             while (
                 normal_index < len(assgined)
-                and isinstance(self.values[normal_index], Named)
+                and isinstance(self.value[normal_index], Named)
                 and assgined[normal_index]
             ):
                 normal_index += 1
 
-            if normal_index < len(self.values):
+            if normal_index < len(self.value):
                 # 找到位置，进行赋值
-                self.values[normal_index].assgin(value.object_ref())
+                self.value[normal_index].assgin(value.object_ref())
                 normal_index += 1
             else:
                 # 没有更多位置，追加到末尾
-                self.values.append(value)
+                self.value.append(value)
 
 
 class GetAttr:
@@ -511,16 +511,16 @@ class IndexOf:
         return str(self)
 
     def __call__(self):
-        return self.obj.values[self.index]
+        return self.obj.value[self.index]
 
     def copy(self):
         return self.obj.copy()
 
     def object_ref(self):
-        return self.obj.object_ref().values[self.index].object_ref()
+        return self.obj.object_ref().value[self.index].object_ref()
 
     def assgin(self, value):
-        self.obj.object_ref().values[self.index] = value
+        self.obj.object_ref().value[self.index] = value
 
 
 class BuiltIn:

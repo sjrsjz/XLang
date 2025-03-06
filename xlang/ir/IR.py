@@ -133,7 +133,7 @@ def create_builtins(context, output_printer=print, input_reader=input):
     def len_func(args):
         obj = args[0]
         if isinstance(obj, Tuple):
-            return Int(len(obj.values))
+            return Int(len(obj.value))
         elif isinstance(obj, String):
             return Int(len(obj.value))
         else:
@@ -171,7 +171,7 @@ def create_builtins(context, output_printer=print, input_reader=input):
         value = args[0]
         key = args[1]
         if isinstance(value, Tuple):
-            value.values.pop(key.value)
+            value.value.pop(key.value)
         elif isinstance(value, String):
             value.value = value.value[: key.value] + value.value[key.value + 1 :]
         else:
@@ -191,11 +191,11 @@ def create_builtins(context, output_printer=print, input_reader=input):
         new_value = key_value.value
         if isinstance(key, Int):
             if isinstance(value, Tuple):
-                if key.value < 0 or key.value >= len(value.values):
+                if key.value < 0 or key.value >= len(value.value):
                     raise ValueError(
-                        f"Index out of range: {key.value}/{len(value.values)}"
+                        f"Index out of range: {key.value}/{len(value.value)}"
                     )
-                value.values[key.value] = new_value
+                value.value[key.value] = new_value
             elif isinstance(value, String):
                 if key.value < 0 or key.value >= len(value.value):
                     raise ValueError(
@@ -215,9 +215,9 @@ def create_builtins(context, output_printer=print, input_reader=input):
                 raise ValueError(
                     f"Replace function's first argument must be Tuple, but got {value}"
                 )
-            for i, v in enumerate(value.values):
+            for i, v in enumerate(value.value):
                 if isinstance(v, KeyValue) and v.key == key:
-                    value.values[i] = KeyValue(key, new_value)
+                    value.value[i] = KeyValue(key, new_value)
                     return NoneType()
         else:
             raise ValueError(
@@ -230,7 +230,7 @@ def create_builtins(context, output_printer=print, input_reader=input):
             raise ValueError(f"sum function's argument must be Tuple, but got {obj}")
 
         sum_value = NoneType()
-        for v in obj.values:
+        for v in obj.value:
             if (
                 not isinstance(v, Int)
                 and not isinstance(v, Float)
@@ -254,8 +254,8 @@ def create_builtins(context, output_printer=print, input_reader=input):
         if not isinstance(obj, Tuple):
             raise ValueError(f"max function's argument must be Tuple, but got {obj}")
 
-        max_value = obj.values[0]
-        for v in obj.values:
+        max_value = obj.value[0]
+        for v in obj.value:
             if not isinstance(v, Int) and not isinstance(v, Float):
                 raise ValueError(
                     f"max function's element must be Int or Float, but got {v}"
@@ -269,8 +269,8 @@ def create_builtins(context, output_printer=print, input_reader=input):
         if not isinstance(obj, Tuple):
             raise ValueError(f"min function's argument must be Tuple, but got {obj}")
 
-        min_value = obj.values[0]
-        for v in obj.values:
+        min_value = obj.value[0]
+        for v in obj.value:
             if not isinstance(v, Int) and not isinstance(v, Float):
                 raise ValueError(
                     f"min function's element must be Int or Float, but got {v}"
@@ -292,7 +292,7 @@ def create_builtins(context, output_printer=print, input_reader=input):
                 f"slice function's third argument must be Int, but got {end}"
             )
         if isinstance(obj, Tuple):
-            return Tuple(obj.values[start.value : end.value])
+            return Tuple(obj.value[start.value : end.value])
         elif isinstance(obj, String):
             return String(obj.value[start.value : end.value])
         else:
@@ -612,7 +612,7 @@ class IRExecutor:
                 default_args.assgin_members(arg_tuple)  # 将参数赋值给默认参数
 
                 # 将默认参数进行let
-                for v in default_args.values:
+                for v in default_args.value:
                     if not isinstance(v, Named):
                         raise ValueError(
                             f"Lambda {func} default args must be Named, but got {v}"

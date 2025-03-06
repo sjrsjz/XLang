@@ -22,7 +22,7 @@ class XLang:
         elif isinstance(x_value, NoneType):
             return None
         elif isinstance(x_value, Tuple):
-            return [self.x_to_python(v) for v in x_value.values]
+            return [self.x_to_python(v) for v in x_value.value]
         elif isinstance(x_value, Variable):
             return self.x_to_python(x_value.value)
         elif isinstance(x_value, KeyValue):
