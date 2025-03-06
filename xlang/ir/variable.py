@@ -517,10 +517,10 @@ class IndexOf:
         return self.obj.copy()
 
     def object_ref(self):
-        return self.obj.object_ref().value[self.index].object_ref()
+        return self.obj.object_ref()[self.index].object_ref()
 
     def assgin(self, value):
-        self.obj.object_ref().value[self.index] = value
+        self.obj.object_ref()[self.index] = value
 
 
 class BuiltIn:
