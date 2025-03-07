@@ -80,6 +80,7 @@ class XLang:
         error_printer=print,
         output_printer=print,
         input_reader=input,
+        open_func=open,
         should_stop_func=None,
         **kwargs,
     ):
@@ -90,7 +91,7 @@ class XLang:
         IRs = generator.generate(ast)
         IRs.append(IR(IRType.RETURN_NONE))
         functions.add("__main__", IRs)
-        executor = IRExecutor(code, error_printer, output_printer, input_reader, should_stop_func)
+        executor = IRExecutor(code, error_printer, output_printer, input_reader, should_stop_func, open_func)
         executor_args = {}
         for k, v in kwargs.items():
             executor_args[k] = self.python_to_x(v)
@@ -106,6 +107,7 @@ class XLang:
         error_printer=print,
         output_printer=print,
         input_reader=input,
+        open_func=open,
         should_stop_func=None,
     ):
         """使用给定的上下文和堆栈执行X语言代码"""
@@ -114,7 +116,7 @@ class XLang:
         generator = IRGenerator(functions=functions)
         IRs = generator.generate(ast)
         functions.add("__main__", IRs)
-        executor = IRExecutor(code, error_printer, output_printer, input_reader, should_stop_func)
+        executor = IRExecutor(code, error_printer, output_printer, input_reader, should_stop_func, open_func)
         result = executor.execute_with_provided_context(functions, entry, context, stack)
         return result
 

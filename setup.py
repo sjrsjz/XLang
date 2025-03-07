@@ -8,7 +8,7 @@ with open("readme.md", "r", encoding="utf-8") as fh:
 
 setup(
     name="xlang-script",
-    version="0.1.0-4",
+    version="0.1.0-6",
     author="sjrsjz@github",
     author_email="sjrsjz@gmail.com",
     description="XLang - Lightweight programming language",
