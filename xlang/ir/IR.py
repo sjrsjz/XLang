@@ -320,7 +320,7 @@ def create_builtins(context, output_printer=print, input_reader=input):
 
 
 class IRExecutor:
-    def __init__(self, origin_code=None, error_printer = print, output_printer=print, input_reader=input, should_stop_func=None):
+    def __init__(self, origin_code=None, error_printer = print, output_printer=print, input_reader=input, should_stop_func=None, open_func=open):
         self.stack = []
         self.context = Context()
         self.ip = 0  # 指令指针
@@ -332,6 +332,7 @@ class IRExecutor:
         self.output_printer = output_printer
         self.input_reader = input_reader
         self.check_should_stop = should_stop_func
+        self.open = open_func
 
     def calculate_line_column(self, code_position):
         lines = self.origin_code.split("\n")
@@ -755,7 +756,7 @@ class IRExecutor:
                 # 包装
                 default_args = Tuple([default_args])
 
-            with open(path.value, "r", encoding="utf-8") as f:
+            with self.open(path.value, "r", encoding="utf-8") as f:
                 code = f.read()
             irs = json.loads(code)
             functions = Functions()
