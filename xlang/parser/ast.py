@@ -584,7 +584,7 @@ class XLangWhile:
         )
 
 
-@node_matcher.register(priority=20)
+@node_matcher.register(priority=19)
 class XLangIF:
     # 匹配 if xxx xxx else xxx 或者 if xxx xxx （没有else），右值猜测最大长度
     def __init__(self, token_list):
@@ -632,7 +632,7 @@ class XLangIF:
         )
 
 
-@node_matcher.register(priority=19) 
+@node_matcher.register(priority=20) 
 class XLangControlFlow:
     """匹配break和continue"""
 
@@ -645,27 +645,46 @@ class XLangControlFlow:
 
         # 检查是否为break关键字
         if _is_identifier(self.token_list[start_idx], "break"):
+            right_tokens = self.token_list[start_idx + 1 :]
+
+            right, offset = node_matcher.match(right_tokens, 0)
+            if not right:
+                return None, 0
+            if offset != len(right_tokens):
+                raise Exception(
+                    "Invalid break: Right side can't be fully matched: ", right_tokens
+                )
+
             return (
                 XLangASTNode(
                     XLangASTNodeTypes.BREAK,
-                    None,  # break不需要子节点
+                    right,
                     self.token_list[start_idx][0]["position"],
                 ),
-                1,  # 只消耗一个token
+                offset + 1,
             )
         # 检查是否为continue关键字
         if _is_identifier(self.token_list[start_idx], "continue"):
+            right_tokens = self.token_list[start_idx + 1 :]
+
+            right, offset = node_matcher.match(right_tokens, 0)
+            if not right:
+                return None, 0
+            if offset != len(right_tokens):
+                raise Exception(
+                    "Invalid break: Right side can't be fully matched: ", right_tokens
+                )
+
             return (
                 XLangASTNode(
                     XLangASTNodeTypes.CONTINUE,
-                    None,  # continue不需要子节点
+                    right,
                     self.token_list[start_idx][0]["position"],
                 ),
-                1,  # 只消耗一个token
+                offset + 1,
             )
 
         return None, 0
-
 
 
 @node_matcher.register(priority=14)
@@ -1030,7 +1049,6 @@ class XLangFunctionDef:
         if (
             not _is_tuple(self.token_list[start_idx])
             or not _is_to(self.token_list[start_idx + 1])
-            or not _is_body(self.token_list[start_idx + 2])
         ):
             return None, 0
 
@@ -1040,7 +1058,7 @@ class XLangFunctionDef:
         if not left_node:
             return None, 0
         right_node = XLangASTParser(
-            Gather(_unwrap_body(self.token_list[start_idx + 2])).gather()
+            Gather(self.token_list[start_idx + 2]).gather()
         ).parse_body(start_idx=0)
         if not right_node:
             return None, 0
@@ -1065,7 +1083,7 @@ class XLangModifier:
             return None, 0
         if len(self.token_list[start_idx]) == 1 and self.token_list[start_idx][0][
             "token"
-        ] in ["copy", "ref", "deref", "keyof", "valueof", "selfof", "assert", "import"]:
+        ] in ["copy", "ref", "deref", "keyof", "valueof", "selfof", "assert", "import", "wrap"]:
             node, offset = node_matcher.match(self.token_list, start_idx + 1)
             if node == None:
                 return None, 0
@@ -1202,7 +1220,7 @@ class XLangVariable:
         self.token_list = token_list
 
     def match(self, start_idx):
-        if _is_tuple(self.token_list[start_idx]):
+        if _is_tuple(self.token_list[start_idx]) or _is_pair(self.token_list[start_idx]):
             unwarped = _unwrap_tuple(self.token_list[start_idx])
             if len(unwarped) == 0:
                 return (

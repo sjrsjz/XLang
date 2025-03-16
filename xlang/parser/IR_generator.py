@@ -9,7 +9,6 @@ class IRGenerator:
         self.function_signture_counter = 0
         self.namespace = namespace
         self.functions = functions
-        self.loop_stack = []
         self.scope_stack = []  # 元素形式: (类型, 附加信息)
         # 类型可以是: 'loop', 'frame', 'function'等
         self.label_counter = 0
@@ -229,6 +228,7 @@ class IRGenerator:
         elif node_type == XLangASTNodeTypes.BREAK:
             irs = []
             irs.append(debug_info)
+            irs.extend(self.generate_without_redirect(node.children))
 
             # 查找最近的循环
             frames_to_pop = 0
@@ -257,6 +257,7 @@ class IRGenerator:
         elif node_type == XLangASTNodeTypes.CONTINUE:
             irs = []
             irs.append(debug_info)
+            irs.extend(self.generate_without_redirect(node.children))
 
             # 查找最近的循环
             frames_to_pop = 0
@@ -287,6 +288,7 @@ class IRGenerator:
 
             # 记录进入循环
             while_head = self.label_generator()
+            while_med = self.label_generator()
             while_end = self.label_generator()
             self.scope_stack.append(("loop", (while_head, while_end))) # 头尾标签
 
@@ -296,7 +298,7 @@ class IRGenerator:
             irs.extend(condition)
 
             # 条件判断，如果为假则跳出循环
-            irs.append(IR(IRType.REDIRECT_JUMP_IF_FALSE, while_end)) 
+            irs.append(IR(IRType.REDIRECT_JUMP_IF_FALSE, while_med)) 
 
             # 生成循环体代码
             body = self.generate_without_redirect(node.children[1])
@@ -304,6 +306,8 @@ class IRGenerator:
 
             # 循环结束后跳回条件判断
             irs.append(IR(IRType.REDIRECT_JUMP, while_head))
+            irs.append(IR(IRType.REDIRECT_LABEL, while_med))
+            irs.append(IR(IRType.LOAD_NONE)) # 如果没有返回值，返回None
             irs.append(IR(IRType.REDIRECT_LABEL, while_end))
             # 离开循环
             self.scope_stack.pop()
@@ -337,6 +341,9 @@ class IRGenerator:
             elif node.children[0] == 'import':
                 irs.extend(val)
                 irs.append(IR(IRType.IMPORT, node.node_position))
+            elif node.children[0] == 'wrap':
+                irs.extend(val)
+                irs.append(IR(IRType.BUILD_WRAP))
             else:
                 raise ValueError(f"Unknown modifier: {node.children[0]}")
             return irs
@@ -368,13 +375,13 @@ class IRGenerator:
                 label = ir.value
                 if label not in label_map:
                     raise ValueError(f"Label not found: {label}")
-                offset = label_map[label] - i
+                offset = label_map[label] - i - 1
                 reduced_irs[i] = IR(IRType.JUMP_OFFSET, offset)
             elif ir.ir_type == IRType.REDIRECT_JUMP_IF_FALSE:
                 label = ir.value
                 if label not in label_map:
                     raise ValueError(f"Label not found: {label}")
-                offset = label_map[label] - i
+                offset = label_map[label] - i - 1
                 reduced_irs[i] = IR(IRType.JUMP_IF_FALSE, offset)
 
         return reduced_irs

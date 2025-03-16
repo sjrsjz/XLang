@@ -2,11 +2,19 @@
   "__MAIN__::__function_1__": [
     {
       "DEBUG_INFO": {
-        "code_position": 90
+        "code_position": 76
       }
     },
     {
       "RESET_STACK": null
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 76
+      }
+    },
+    {
+      "NEW_FRAME": null
     },
     {
       "DEBUG_INFO": {
@@ -117,7 +125,7 @@
       "BINARAY_OP": "<="
     },
     {
-      "JUMP_IF_FALSE": 25
+      "JUMP_IF_FALSE": 24
     },
     {
       "DEBUG_INFO": {
@@ -203,7 +211,7 @@
       "POP_FRAME": null
     },
     {
-      "JUMP_OFFSET": 11
+      "JUMP_OFFSET": 10
     },
     {
       "DEBUG_INFO": {
@@ -248,17 +256,28 @@
       "LOAD_NONE": null
     },
     {
+      "POP_FRAME": null
+    },
+    {
       "RETURN_NONE": null
     }
   ],
   "__MAIN__::__function_2__": [
     {
       "DEBUG_INFO": {
-        "code_position": 384
+        "code_position": 383
       }
     },
     {
       "RESET_STACK": null
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 383
+      }
+    },
+    {
+      "NEW_FRAME": null
     },
     {
       "DEBUG_INFO": {
@@ -272,17 +291,28 @@
       "RETURN": null
     },
     {
+      "POP_FRAME": null
+    },
+    {
       "RETURN_NONE": null
     }
   ],
   "__MAIN__::__function_3__::__function_1__": [
     {
       "DEBUG_INFO": {
-        "code_position": 467
+        "code_position": 449
       }
     },
     {
       "RESET_STACK": null
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 449
+      }
+    },
+    {
+      "NEW_FRAME": null
     },
     {
       "DEBUG_INFO": {
@@ -320,7 +350,7 @@
       "CALL_LAMBDA": null
     },
     {
-      "JUMP_IF_FALSE": 17
+      "JUMP_IF_FALSE": 16
     },
     {
       "DEBUG_INFO": {
@@ -378,7 +408,10 @@
       "POP_FRAME": null
     },
     {
-      "JUMP_OFFSET": -22
+      "JUMP_OFFSET": -23
+    },
+    {
+      "LOAD_NONE": null
     },
     {
       "RESET_STACK": null
@@ -387,17 +420,28 @@
       "LOAD_NONE": null
     },
     {
+      "POP_FRAME": null
+    },
+    {
       "RETURN_NONE": null
     }
   ],
   "__MAIN__::__function_3__": [
     {
       "DEBUG_INFO": {
-        "code_position": 416
+        "code_position": 402
       }
     },
     {
       "RESET_STACK": null
+    },
+    {
+      "DEBUG_INFO": {
+        "code_position": 402
+      }
+    },
+    {
+      "NEW_FRAME": null
     },
     {
       "DEBUG_INFO": {
@@ -462,6 +506,9 @@
     },
     {
       "LOAD_NONE": null
+    },
+    {
+      "POP_FRAME": null
     },
     {
       "RETURN_NONE": null

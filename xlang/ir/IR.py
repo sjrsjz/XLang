@@ -16,6 +16,7 @@ from .variable import (
     BuiltIn,
     Variable,
     Named,
+    Wrap
 )
 
 import json
@@ -31,6 +32,7 @@ class IRType(enum.Enum):
     BUILD_TUPLE = auto()  # 构建元组，参数为元组长度
     BUILD_KEY_VAL = auto()  # 构建键值对
     BUILD_NAMED = auto()  # 构建命名参数
+    BUILD_WRAP = auto()  # 构建包装对象
     BINARAY_OP = auto()  # 二元运算符
     UNARY_OP = auto()  # 一元运算符
     LET_VAL = auto()  # 定义变量，参数为变量名
@@ -120,6 +122,7 @@ class Functions:
 
 
 def create_builtins(context, output_printer=print, input_reader=input):
+    
     def print_func(args):
         list_args = [arg.value for arg in args]
         output_printer(*list_args)
@@ -529,6 +532,10 @@ class IRExecutor:
             key = self.stack.pop().object_ref()
             self.stack.append(KeyValue(key, value))
 
+        elif instr.ir_type == IRType.BUILD_WRAP:
+            value = self.stack.pop().object_ref()
+            self.stack.append(Wrap(value))
+
         elif instr.ir_type == IRType.BINARAY_OP:
             right = self.stack.pop().object_ref()
             left = self.stack.pop().object_ref()
@@ -664,7 +671,9 @@ class IRExecutor:
 
         elif instr.ir_type == IRType.POP_FRAME:
             # print("pop frame")
+            obj = self.stack.pop()
             self.context.pop_frame(self.stack)
+            self.stack.append(obj)
 
         elif instr.ir_type == IRType.JUMP_OFFSET:
             self.ip += instr.value
@@ -713,7 +722,7 @@ class IRExecutor:
 
         elif instr.ir_type == IRType.VALUE_OF:
             obj = self.stack.pop().object_ref()
-            if isinstance(obj, KeyValue) or isinstance(obj, Named):
+            if isinstance(obj, KeyValue) or isinstance(obj, Named) or isinstance(obj, Wrap):
                 self.stack.append(obj.value)
             else:
                 raise ValueError(f"Object is not KeyValue or Named: {obj}")

@@ -87,6 +87,8 @@ class Int:
         return float(self.value)
 
     def assgin(self, value):
+        if not isinstance(value, (Int, Float)):
+            raise ValueError("Cannot assign value to Int")
         self.value = value.value
 
     def object_ref(self):
@@ -180,6 +182,8 @@ class Float:
         return int(self.value)
 
     def assgin(self, value):
+        if not isinstance(value, (Float, Int)):
+            raise ValueError("Cannot assign value to Float")
         self.value = value.value
 
     def object_ref(self):
@@ -231,6 +235,8 @@ class Bool:
         return float(self.value)
 
     def assgin(self, value):
+        if not isinstance(value, Bool):
+            raise ValueError("Cannot assign value to Bool")
         self.value = value.value
 
     def object_ref(self):
@@ -359,8 +365,7 @@ class Lambda:
         return str(self)
 
     def assgin(self, o):
-        self.code_position = o.captured_val
-        self.signature = o.signature
+        raise ValueError("Cannot assign value to Lambda")
 
     def object_ref(self):
         return self
@@ -430,6 +435,8 @@ class Tuple:
         return Tuple(copyed_values)
 
     def assgin(self, value):
+        if not isinstance(value, Tuple):
+            raise ValueError("Cannot assign value to Tuple")
         self.value = value.value.copy() # 浅拷贝
 
     def object_ref(self):
@@ -552,6 +559,9 @@ class BuiltIn:
 
     def object_ref(self):
         return self
+    
+    def assgin(self, value):
+        raise ValueError("Cannot assign value to BuiltIn")
 
 class Ref:
     def __init__(self, value):
@@ -614,15 +624,36 @@ class Variable:
 
     def __str__(self):
         return f"Variable({self.value})"
-    
+
     def __repr__(self):
         return str(self)
-    
+
     def copy(self):
         return self.value.copy()
-    
+
     def object_ref(self):
         return self.value.object_ref()
-    
+
+    def assgin(self, value):
+        self.value.assgin(value)
+
+
+class Wrap:
+    # 包装变量，用于在 Context 中存储变量
+    def __init__(self, value):
+        self.value = value
+
+    def __str__(self):
+        return f"Wrap({self.value})"
+
+    def __repr__(self):
+        return str(self)
+
+    def copy(self):
+        return self.value.copy()
+
+    def object_ref(self):
+        return self
+
     def assgin(self, value):
         self.value = value

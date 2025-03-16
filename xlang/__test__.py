@@ -29,7 +29,7 @@ def test():
 
     code = """
     module := import "modules/test.xir" => (A => "Default Value"); // Import the module as Lambda, () is the default argument
-    module = module(); // Call the module to get the actual value
+    module := module(); // Call the module to get the actual value
     print(repr(module));
 
     loop_func := module.loop((n => 0) -> {
